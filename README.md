@@ -1,4 +1,3 @@
-```markdown
 # TRACE.AI 🤖
 ### **Turn-based Response Analytics & Chat Engine**
 
