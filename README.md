@@ -1,4 +1,4 @@
-# TRACE.AI 🤖
+# TRACE.AI ☯️
 ### **Turn-based Response Analytics & Chat Engine**
 
 TRACE.AI is a local, multi-turn AI chatbot platform built using **LLaMA 3** (via Ollama), **FastAPI**, **MongoDB**, and a modern web-based frontend interface. It features a built-in, analytics-ready feedback system to track response ratings, correctness, and response lengths.
