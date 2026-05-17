@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TRACE AI Chatbot</title>
+
+    <link rel="stylesheet" href="/style.css">
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/yin.png">
+</head>
+
+<body>
+
+<div class="chat-container">
+
+    <div class="header">
+        <img
+            src="/yin.png"
+            class="logo"
+        >
+
+        <span>TRACE.AI</span>
+    </div>
+
+    <div id="quoteBar" class="quote-bar">
+        Turn-based Response Analytics & Chat Engine (TRACE)
+    </div>
+
+    <div id="chatBox" class="chat-box"></div>
+    <div id="toastMessage" class="toast-message"></div>
+    <!-- MODERN FEEDBACK PANEL -->
+    <div id="feedbackPanel" class="feedback-panel">
+
+        <div class="feedback-header">
+            <span>Response Feedback</span>
+            <small>Required before next message</small>
+        </div>
+
+        <div class="feedback-section">
+            <p>Rating</p>
+
+            <div class="feedback-options" id="ratingOptions">
+                <button type="button" onclick="selectFeedback('rating', '1', this)">1</button>
+                <button type="button" onclick="selectFeedback('rating', '2', this)">2</button>
+                <button type="button" onclick="selectFeedback('rating', '3', this)">3</button>
+                <button type="button" onclick="selectFeedback('rating', '4', this)">4</button>
+            </div>
+        </div>
+
+        <div class="feedback-section">
+            <p>Correctness</p>
+
+            <div class="feedback-options" id="correctnessOptions">
+                <button type="button" onclick="selectFeedback('correctness', 'Correct', this)">Correct</button>
+                <button type="button" onclick="selectFeedback('correctness', 'Partial', this)">Partial</button>
+                <button type="button" onclick="selectFeedback('correctness', 'Incorrect', this)">Incorrect</button>
+            </div>
+        </div>
+
+        <div class="feedback-section">
+            <p>Length</p>
+
+            <div class="feedback-options" id="lengthOptions">
+                <button type="button" onclick="selectFeedback('lengthType', 'Short', this)">Short</button>
+                <button type="button" onclick="selectFeedback('lengthType', 'To the Point', this)">To the Point</button>
+                <button type="button" onclick="selectFeedback('lengthType', 'Lengthy', this)">Lengthy</button>
+            </div>
+        </div>
+
+        <button class="submit-feedback-btn" onclick="submitFeedback()">
+            Submit Feedback
+        </button>
+
+    </div>
+
+    <div class="input-area">
+        <input id="msg" placeholder="Type message..." />
+        <button id="sendBtn" onclick="sendMsg()">Send</button>
+    </div>
+
+</div>
+
+<script>
+let sessionId = localStorage.getItem("session_id");
+
+if (!sessionId) {
+    sessionId = crypto.randomUUID();
+    localStorage.setItem("session_id", sessionId);
+}
+
+let lastInteractionId = null;
+
+let selectedRating = "";
+let selectedCorrectness = "";
+let selectedLengthType = "";
+
+const user = localStorage.getItem("username");
+
+if (!user) {
+    window.location.href = "/login.html";
+}
+
+const chatBox = document.getElementById("chatBox");
+const quoteBar = document.getElementById("quoteBar");
+
+const traceQuotes = [
+    "I'm TRACE — don’t worry, I don’t trace anyone. 😄",
+    "Turn-based Response Analytics & Chat Engine (TRACE).",
+    "Thinking locally, responding globally.",
+    "Your conversation is data today, insight tomorrow.",
+    "A chatbot that replies, records, and reflects.",
+    "Every response is a signal. Every signal becomes analytics.",
+    "Not just chatting — measuring intelligence one turn at a time.",
+    "Local model. Structured memory. Smarter conversations.",
+    "TRACE: where dialogue becomes data.",
+    "I may be local, but my thoughts are distributed. 🤖",
+    "Patience... even silicon needs a moment to think.",
+    "If the response is slow, blame philosophy — not me.",
+    "Turning prompts into patterns.",
+    "A conversation engine with an analytical soul.",
+    "Not magic. Just tokens, timing, and MongoDB."
+];
+
+let quoteIndex = 0;
+
+function rotateQuote() {
+    quoteBar.innerText = traceQuotes[quoteIndex];
+    quoteIndex = (quoteIndex + 1) % traceQuotes.length;
+}
+
+rotateQuote();
+setInterval(rotateQuote, 15000);
+
+function addMessage(text, className) {
+    const div = document.createElement("div");
+    div.classList.add("msg", className);
+    div.innerText = text;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function typeText(element, text, speed = 15) {
+    let i = 0;
+
+    function typing() {
+        if (i < text.length) {
+            element.innerHTML += text.charAt(i);
+            i++;
+            chatBox.scrollTop = chatBox.scrollHeight;
+            setTimeout(typing, speed);
+        }
+    }
+
+    typing();
+}
+
+    function showToast(message, type = "success") {
+    const toast = document.getElementById("toastMessage");
+
+    toast.innerText = message;
+    toast.className = "toast-message show " + type;
+
+    setTimeout(() => {
+        toast.className = "toast-message";
+    }, 3000);
+}
+async function sendMsg() {
+    const input = document.getElementById("msg");
+    const sendBtn = document.getElementById("sendBtn");
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    addMessage(message, "user");
+    input.value = "";
+
+    input.disabled = true;
+    sendBtn.disabled = true;
+
+    rotateQuote();
+
+    const loadingDiv = document.createElement("div");
+    loadingDiv.classList.add("msg", "ai", "typing");
+    loadingDiv.innerText = "Thinking...";
+    chatBox.appendChild(loadingDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    try {
+        const res = await fetch("/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: message,
+                session_id: sessionId
+            })
+        });
+
+        const data = await res.json();
+
+        console.log("CHAT RESPONSE:", data);
+        console.log("SESSION ID:", sessionId);
+
+        lastInteractionId = data.interaction_id;
+
+        loadingDiv.remove();
+
+        const aiDiv = document.createElement("div");
+        aiDiv.classList.add("msg", "ai");
+        chatBox.appendChild(aiDiv);
+
+        typeText(aiDiv, data.llama_response, 15);
+
+        document.getElementById("feedbackPanel").style.display = "block";
+
+    } catch (error) {
+        loadingDiv.remove();
+
+        addMessage(
+            "Error: Unable to connect to TRACE backend.",
+            "ai"
+        );
+
+        input.disabled = false;
+        sendBtn.disabled = false;
+    }
+}
+
+function selectFeedback(type, value, button) {
+
+    if (type === "rating") {
+        selectedRating = value;
+
+        document
+            .querySelectorAll("#ratingOptions button")
+            .forEach(btn => btn.classList.remove("selected"));
+    }
+
+    if (type === "correctness") {
+        selectedCorrectness = value;
+
+        document
+            .querySelectorAll("#correctnessOptions button")
+            .forEach(btn => btn.classList.remove("selected"));
+    }
+
+    if (type === "lengthType") {
+        selectedLengthType = value;
+
+        document
+            .querySelectorAll("#lengthOptions button")
+            .forEach(btn => btn.classList.remove("selected"));
+    }
+
+    button.classList.add("selected");
+}
+
+async function submitFeedback() {
+
+    if (!selectedRating || !selectedCorrectness || !selectedLengthType) {
+        showToast("Please complete all feedback fields.", "error");
+        return;
+    }
+
+    if (!lastInteractionId) {
+        showToast("No response found for feedback.", "error");
+        return;
+    }
+
+    try {
+        const res = await fetch("/feedback", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                interaction_id: lastInteractionId,
+                rating: parseInt(selectedRating),
+                correctness: selectedCorrectness,
+                length_type: selectedLengthType
+            })
+        });
+
+        const data = await res.json();
+
+        showToast(data.message, data.success ? "success" : "error");
+
+        if (data.success) {
+            document.getElementById("feedbackPanel").style.display = "none";
+
+            selectedRating = "";
+            selectedCorrectness = "";
+            selectedLengthType = "";
+
+            document
+                .querySelectorAll(".feedback-options button")
+                .forEach(btn => btn.classList.remove("selected"));
+
+            document.getElementById("msg").disabled = false;
+            document.getElementById("sendBtn").disabled = false;
+            document.getElementById("msg").focus();
+        }
+
+    } catch (error) {
+        showToast("Feedback could not be submitted. Please try again.", "error");
+    }
+}
+</script>
+
+</body>
+</html>

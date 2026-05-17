@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TRACE AI Chatbot</title>
+
+    <link rel="stylesheet" href="/style.css">
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/yin.png">
+</head>
+
+<body>
+
+<div class="auth-container">
+    <h2 class="auth-title">Create Account</h2>
+    <p class="auth-subtitle">Register to start using TRACE AI Chatbot</p>
+
+    <input id="name" placeholder="Name">
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+
+    <div id="toastMessage" class="toast-message auth-toast"></div>
+
+    <button onclick="register()">Register</button>
+
+    <p class="auth-text">
+        Already have an account?
+        <a class="auth-link" href="/login.html">Login</a>
+    </p>
+</div>
+
+<script>
+function showToast(message, type = "success") {
+    const toast = document.getElementById("toastMessage");
+
+    toast.innerText = message;
+    toast.className = "toast-message auth-toast show " + type;
+
+    setTimeout(() => {
+        toast.className = "toast-message auth-toast";
+    }, 3000);
+}
+
+async function register() {
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!name || !email || !password) {
+        showToast("Please complete all fields.", "error");
+        return;
+    }
+
+    try {
+        const res = await fetch("/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name,
+                email,
+                password
+            })
+        });
+
+        const data = await res.json();
+
+        showToast(
+            data.message,
+            data.success ? "success" : "error"
+        );
+
+        if (data.success) {
+            setTimeout(() => {
+                window.location.href = "/login.html";
+            }, 900);
+        }
+
+    } catch (error) {
+        showToast("Unable to connect to TRACE backend.", "error");
+    }
+}
+</script>
+
+</body>
+</html>
