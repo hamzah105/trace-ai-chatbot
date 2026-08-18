@@ -1,16 +1,31 @@
+import os
+
 import requests
+from dotenv import load_dotenv
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
+load_dotenv()
+
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3")
+OLLAMA_TIMEOUT_SECONDS = float(os.getenv("OLLAMA_TIMEOUT_SECONDS", "300"))
 
 
-def generate_response(prompt: str):
+class OllamaServiceError(Exception):
+    pass
+
+
+class OllamaTimeoutError(OllamaServiceError):
+    pass
+
+
+def generate_response(prompt: str) -> str:
     payload = {
-        "model": "llama3",
+        "model": OLLAMA_MODEL,
         "prompt": prompt,
         "stream": False,
         "options": {
-            "temperature": 0.4,
-            "num_predict": 180
+            "temperature": 0.2,
+            "num_predict": 140
         }
     }
 
@@ -18,12 +33,20 @@ def generate_response(prompt: str):
         response = requests.post(
             OLLAMA_URL,
             json=payload,
-            timeout=300
+            timeout=(5, OLLAMA_TIMEOUT_SECONDS),
         )
-
+        response.raise_for_status()
         data = response.json()
+    except requests.Timeout as error:
+        raise OllamaTimeoutError(
+            f"LLaMA 3 did not respond within {OLLAMA_TIMEOUT_SECONDS:g} seconds"
+        ) from error
+    except requests.RequestException as error:
+        raise OllamaServiceError("Could not connect to the local Ollama service") from error
+    except ValueError as error:
+        raise OllamaServiceError("Ollama returned an invalid response") from error
 
-        return data.get("response", "")
-
-    except Exception as e:
-        return f"Error: {str(e)}"
+    generated_text = data.get("response", "").strip()
+    if not generated_text:
+        raise OllamaServiceError("LLaMA 3 returned an empty response")
+    return generated_text

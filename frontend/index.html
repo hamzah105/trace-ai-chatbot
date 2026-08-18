@@ -3,25 +3,274 @@
 <head>
     <title>TRACE AI Chatbot</title>
 
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/style.css?v=phase2-google-oauth">
 
     <link
         rel="icon"
         type="image/png"
-        href="/yin.png">
+        href="/yin.png?v=official-logo-2">
+
+    <script src="/background.js" defer></script>
 </head>
 
-<body>
+<body class="chat-page">
+
+<div class="cosmic-background" aria-hidden="true">
+    <canvas id="starCanvas"></canvas>
+
+    <div class="nebula nebula-one"></div>
+    <div class="nebula nebula-two"></div>
+    <div class="nebula nebula-three"></div>
+
+    <div class="saturn-scene" id="saturnScene">
+        <div class="orbital-halo"></div>
+
+        <svg
+            class="saturn-art"
+            viewBox="0 0 1000 620"
+            xmlns="http://www.w3.org/2000/svg"
+            focusable="false"
+        >
+            <defs>
+                <radialGradient id="saturnSphere" cx="29%" cy="23%" r="78%">
+                    <stop offset="0%" style="stop-color: var(--saturn-light)" />
+                    <stop offset="42%" style="stop-color: var(--saturn-base)" />
+                    <stop offset="72%" style="stop-color: var(--saturn-mid)" />
+                    <stop offset="100%" style="stop-color: var(--saturn-dark)" />
+                </radialGradient>
+
+                <linearGradient id="saturnAtmosphere" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#ead19d" />
+                    <stop offset="8%" stop-color="#d2ab6d" />
+                    <stop offset="16%" stop-color="#f0d9a5" />
+                    <stop offset="25%" stop-color="#c79c5d" />
+                    <stop offset="34%" stop-color="#dfbd81" />
+                    <stop offset="44%" stop-color="#aa7744" />
+                    <stop offset="54%" stop-color="#e2c58d" />
+                    <stop offset="64%" stop-color="#b78149" />
+                    <stop offset="74%" stop-color="#d4b174" />
+                    <stop offset="84%" stop-color="#93613a" />
+                    <stop offset="93%" stop-color="#c59a5d" />
+                    <stop offset="100%" stop-color="#765034" />
+                </linearGradient>
+
+                <radialGradient id="saturnLighting" cx="24%" cy="29%" r="84%">
+                    <stop offset="0%" stop-color="#fff4d4" stop-opacity="0.3" />
+                    <stop offset="32%" stop-color="#f3d79e" stop-opacity="0.08" />
+                    <stop offset="66%" stop-color="#a06f47" stop-opacity="0.04" />
+                    <stop offset="86%" stop-color="#70462d" stop-opacity="0.1" />
+                    <stop offset="100%" stop-color="#432518" stop-opacity="0.22" />
+                </radialGradient>
+
+                <linearGradient id="saturnRingGradient" x1="70" y1="0" x2="930" y2="0" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#d8cfbf" stop-opacity="0.12" />
+                    <stop offset="18%" stop-color="#ead8ae" stop-opacity="0.48" />
+                    <stop offset="44%" style="stop-color: var(--saturn-ring-light)" />
+                    <stop offset="67%" style="stop-color: var(--saturn-ring)" />
+                    <stop offset="88%" stop-color="#cec4b2" stop-opacity="0.4" />
+                    <stop offset="100%" stop-color="#c3b8a4" stop-opacity="0.1" />
+                </linearGradient>
+
+                <filter id="saturnBandSoftness" x="-15%" y="-20%" width="130%" height="140%">
+                    <feGaussianBlur stdDeviation="3.2" />
+                </filter>
+
+                <filter id="saturnShadowSoftness" x="-55%" y="-30%" width="210%" height="160%">
+                    <feGaussianBlur stdDeviation="22" />
+                </filter>
+
+                <filter id="saturnAtmosphereGlow" x="-40%" y="-40%" width="180%" height="180%">
+                    <feGaussianBlur stdDeviation="10" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+
+                <filter id="saturnRingGlow" x="-20%" y="-70%" width="140%" height="240%">
+                    <feGaussianBlur stdDeviation="3.4" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+
+                <clipPath id="saturnPlanetClip">
+                    <circle cx="500" cy="286" r="188" />
+                </clipPath>
+
+                <clipPath id="saturnFrontRingClip">
+                    <path d="M0 398 L1000 202 L1000 620 L0 620 Z" />
+                </clipPath>
+
+                <g id="saturnRingLines" fill="none" transform="rotate(-11 500 302)">
+                    <ellipse cx="500" cy="302" rx="430" ry="104" stroke="#d6cec0" stroke-opacity="0.2" stroke-width="5" />
+                    <ellipse cx="500" cy="302" rx="414" ry="98" stroke="url(#saturnRingGradient)" stroke-opacity="0.5" stroke-width="17" />
+                    <ellipse cx="500" cy="302" rx="389" ry="90" stroke="url(#saturnRingGradient)" stroke-opacity="0.7" stroke-width="25" />
+                    <ellipse cx="500" cy="302" rx="363" ry="82" stroke="#756753" stroke-opacity="0.28" stroke-width="4" />
+                    <ellipse cx="500" cy="302" rx="349" ry="77" stroke="url(#saturnRingGradient)" stroke-opacity="0.74" stroke-width="15" />
+                    <ellipse cx="500" cy="302" rx="326" ry="70" stroke="#fff0cd" stroke-opacity="0.48" stroke-width="7" />
+                </g>
+            </defs>
+
+            <g class="saturn-ring-group saturn-ring-back" filter="url(#saturnRingGlow)">
+                <use href="#saturnRingLines" />
+            </g>
+
+            <circle
+                class="saturn-atmospheric-aura"
+                cx="500"
+                cy="286"
+                r="196"
+                fill="none"
+                stroke="#a855f7"
+                stroke-opacity="0.2"
+                stroke-width="10"
+                filter="url(#saturnAtmosphereGlow)"
+            />
+
+            <g class="saturn-planet-svg">
+                <circle cx="500" cy="286" r="188" fill="url(#saturnSphere)" />
+
+                <g clip-path="url(#saturnPlanetClip)">
+                    <circle cx="500" cy="286" r="188" fill="url(#saturnAtmosphere)" opacity="0.72" />
+
+                    <g class="saturn-cloud-bands" fill="none" filter="url(#saturnBandSoftness)">
+                        <path d="M304 205 C390 188 600 220 698 198" stroke="#fff0c7" stroke-opacity="0.28" stroke-width="13" />
+                        <path d="M296 236 C408 219 584 251 704 229" stroke="#91613a" stroke-opacity="0.2" stroke-width="12" />
+                        <path d="M292 266 C390 249 607 278 708 255" stroke="#f7deb0" stroke-opacity="0.25" stroke-width="15" />
+                        <path d="M291 300 C403 279 594 316 709 291" stroke="#865532" stroke-opacity="0.22" stroke-width="16" />
+                        <path d="M300 334 C402 319 601 350 700 329" stroke="#f2d39b" stroke-opacity="0.24" stroke-width="13" />
+                        <path d="M315 370 C413 351 583 389 686 361" stroke="#75472d" stroke-opacity="0.22" stroke-width="15" />
+                    </g>
+
+                    <ellipse cx="438" cy="180" rx="125" ry="42" fill="#fff1c9" fill-opacity="0.08" filter="url(#saturnBandSoftness)" />
+                    <ellipse cx="682" cy="304" rx="72" ry="166" fill="#603820" fill-opacity="0.065" filter="url(#saturnShadowSoftness)" />
+                </g>
+
+                <circle cx="500" cy="286" r="188" fill="url(#saturnLighting)" />
+                <circle cx="500" cy="286" r="187" fill="none" stroke="#f7ddb0" stroke-opacity="0.32" stroke-width="2" />
+            </g>
+
+            <g
+                class="saturn-ring-group saturn-ring-front"
+                clip-path="url(#saturnFrontRingClip)"
+                filter="url(#saturnRingGlow)"
+            >
+                <use href="#saturnRingLines" />
+            </g>
+        </svg>
+    </div>
+
+    <div class="cosmic-grid"></div>
+    <div class="space-vignette"></div>
+</div>
+
+<div class="chat-layout">
+
+<aside
+    id="sessionSidebar"
+    class="session-sidebar"
+    aria-label="Chat sessions"
+    aria-hidden="true"
+    inert
+>
+    <div class="session-sidebar-header">
+        <div>
+            <strong>Sessions</strong>
+            <small id="sessionCount">Loading...</small>
+        </div>
+        <button
+            id="sessionCloseBtn"
+            class="session-sidebar-close"
+            type="button"
+            aria-label="Close sessions"
+        >&#215;</button>
+    </div>
+
+    <button
+        id="sidebarNewChatBtn"
+        class="sidebar-new-chat"
+        type="button"
+        onclick="startNewChat()"
+        disabled
+    >+ New Chat</button>
+
+    <div id="sessionList" class="session-list" aria-live="polite">
+        <p class="session-list-empty">Loading sessions...</p>
+    </div>
+</aside>
+
+<button
+    id="sidebarOverlay"
+    class="sidebar-overlay"
+    type="button"
+    aria-label="Close sessions"
+    aria-hidden="true"
+    tabindex="-1"
+></button>
 
 <div class="chat-container">
 
     <div class="header">
+        <button
+            id="sessionToggleBtn"
+            class="session-toggle"
+            type="button"
+            aria-label="Open sessions"
+            aria-expanded="false"
+        >
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </button>
+
         <img
-            src="/yin.png"
+            src="/yin.png?v=official-logo-2"
+            alt="TRACE.AI official logo"
             class="logo"
         >
 
         <span>TRACE.AI</span>
+
+        <div class="session-actions">
+            <small id="sessionStatus">Starting session...</small>
+        </div>
+
+        <div id="profileMenu" class="profile-menu">
+            <button
+                id="profileToggleBtn"
+                class="profile-toggle"
+                type="button"
+                aria-label="Open user profile"
+                aria-expanded="false"
+            >
+                <span id="profileAvatar" class="profile-avatar" aria-hidden="true">
+                    <img
+                        id="profileAvatarImage"
+                        class="profile-avatar-image"
+                        alt=""
+                        referrerpolicy="no-referrer"
+                        hidden
+                    >
+                    <span id="profileAvatarFallback">T</span>
+                </span>
+                <span id="profileButtonName" class="profile-button-name">TRACE User</span>
+                <span class="profile-chevron" aria-hidden="true">&#9662;</span>
+            </button>
+
+            <div
+                id="profileDropdown"
+                class="profile-dropdown"
+                aria-hidden="true"
+                inert
+            >
+                <strong id="profileFullName">TRACE User</strong>
+                <span id="profileEmail" class="profile-email"></span>
+                <span id="profileProvider" class="profile-provider"></span>
+                <button id="logoutBtn" class="profile-logout" type="button">Logout</button>
+            </div>
+        </div>
     </div>
 
     <div id="quoteBar" class="quote-bar">
@@ -76,29 +325,36 @@
     </div>
 
     <div class="input-area">
-        <input id="msg" placeholder="Type message..." />
-        <button id="sendBtn" onclick="sendMsg()">Send</button>
+        <input id="msg" placeholder="Type message..." disabled />
+        <button id="sendBtn" onclick="sendMsg()" disabled>Send</button>
     </div>
 
 </div>
 
-<script>
-let sessionId = localStorage.getItem("session_id");
+</div>
 
-if (!sessionId) {
-    sessionId = crypto.randomUUID();
-    localStorage.setItem("session_id", sessionId);
-}
+<script>
+let sessionId = null;
+let sessionSummaries = [];
+let sessionLoadSequence = 0;
+let currentSessionMessageCount = 0;
+let currentSessionStatus = null;
 
 let lastInteractionId = null;
+let awaitingFeedback = false;
 
 let selectedRating = "";
 let selectedCorrectness = "";
 let selectedLengthType = "";
 
 const user = localStorage.getItem("username");
+const userId = localStorage.getItem("user_id");
+const userEmail = localStorage.getItem("user_email") || localStorage.getItem("email") || "";
+const authProvider = localStorage.getItem("auth_provider") || "local";
+const profilePicture = localStorage.getItem("profile_picture") || "";
+const sessionStorageKey = userId ? `trace_session_${userId}` : null;
 
-if (!user) {
+if (!user || !userId) {
     window.location.href = "/login.html";
 }
 
@@ -106,21 +362,39 @@ const chatBox = document.getElementById("chatBox");
 const quoteBar = document.getElementById("quoteBar");
 
 const traceQuotes = [
-    "I'm TRACE — don’t worry, I don’t trace anyone. 😄",
+    "I'm TRACE, Relax...., I don’t trace anyone. 😄",
     "Turn-based Response Analytics & Chat Engine (TRACE).",
     "Thinking locally, responding globally.",
+    "Sometimes, you just need a little appreciation. That’s it.",
     "Your conversation is data today, insight tomorrow.",
     "A chatbot that replies, records, and reflects.",
     "Every response is a signal. Every signal becomes analytics.",
-    "Not just chatting — measuring intelligence one turn at a time.",
+    "Not just chatting, measuring intelligence with multi turns at a time.",
     "Local model. Structured memory. Smarter conversations.",
     "TRACE: where dialogue becomes data.",
-    "I may be local, but my thoughts are distributed. 🤖",
-    "Patience... even silicon needs a moment to think.",
-    "If the response is slow, blame philosophy — not me.",
+    "I may be local, but my thoughts are distributed. ☯️",
+    "Patience.... even silicon needs a moment to think.",
+    "If the response is slow, blame philosophy, not me.",
     "Turning prompts into patterns.",
     "A conversation engine with an analytical soul.",
-    "Not magic. Just tokens, timing, and MongoDB."
+    "Remember 2012: AlexNet proved that deep learning could scale, and the modern AI race officially began.",
+    "2017: Google dropped 'Attention Is All You Need,' and apparently, attention really was all we needed to accidentally redesign the future.",
+    "2020: Scaling laws arrived and said, 'Stop overthinking it, bigger models, more data, more compute, better intelligence.' Terrifyingly, it worked.",
+    "2022: ChatGPT launched, and suddenly everyone from students to CEOs discovered that AI was no longer hiding inside research papers.",
+    "Quantization changed the game: yesterday you needed a data center, today your local LLaMA model can sit on your machine and still act smarter than half the internet.",
+    "All of this is Local, Powered by Llama3's powerfull neural networks.",
+    "Ever wondered how could you download the entire Wikipedia?, Well I'm here",
+    "This much is known: For every rational line or forthright statement, there are leagues of senseless cocophony, verbal nonsense, and incoherency",
+    "Not magic. Just tokens, timing, and MongoDB.",
+    "Fathoming......🤔....",
+    "Pondering......⚠️....",
+    "Mulling........🤤....",
+    "Musing.........😴....",
+    "Cogitating.....🧠....",
+    "Sleuthing......🧐....",
+    "Triangulating..3️⃣....",
+    "Sifting........🔀....",
+    "Untangling.....🪓...."
 ];
 
 let quoteIndex = 0;
@@ -141,12 +415,24 @@ function addMessage(text, className) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+function renderChatHistory(messages) {
+    chatBox.innerHTML = "";
+    currentSessionMessageCount = messages.length;
+
+    messages.forEach(interaction => {
+        addMessage(interaction.user_message || "", "user");
+        addMessage(interaction.llama_response || "", "ai");
+    });
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
 function typeText(element, text, speed = 15) {
     let i = 0;
 
     function typing() {
         if (i < text.length) {
-            element.innerHTML += text.charAt(i);
+            element.textContent += text.charAt(i);
             i++;
             chatBox.scrollTop = chatBox.scrollHeight;
             setTimeout(typing, speed);
@@ -156,7 +442,7 @@ function typeText(element, text, speed = 15) {
     typing();
 }
 
-    function showToast(message, type = "success") {
+function showToast(message, type = "success") {
     const toast = document.getElementById("toastMessage");
 
     toast.innerText = message;
@@ -166,12 +452,402 @@ function typeText(element, text, speed = 15) {
         toast.className = "toast-message";
     }, 3000);
 }
+
+function errorMessage(data, fallback) {
+    if (typeof data.detail === "string") return data.detail;
+    if (data.detail && data.detail.message) return data.detail.message;
+    return data.message || fallback;
+}
+
+function setNewChatEnabled(enabled) {
+    document.getElementById("sidebarNewChatBtn").disabled = !enabled;
+}
+
+function openSessionSidebar() {
+    const sidebar = document.getElementById("sessionSidebar");
+    const overlay = document.getElementById("sidebarOverlay");
+    sidebar.classList.add("open");
+    sidebar.removeAttribute("inert");
+    sidebar.setAttribute("aria-hidden", "false");
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden", "false");
+    document.getElementById("sessionToggleBtn").setAttribute("aria-expanded", "true");
+}
+
+function closeSessionSidebar() {
+    const sidebar = document.getElementById("sessionSidebar");
+    const overlay = document.getElementById("sidebarOverlay");
+    sidebar.classList.remove("open");
+    sidebar.setAttribute("inert", "");
+    sidebar.setAttribute("aria-hidden", "true");
+    overlay.classList.remove("show");
+    overlay.setAttribute("aria-hidden", "true");
+    document.getElementById("sessionToggleBtn").setAttribute("aria-expanded", "false");
+}
+
+function toggleSessionSidebar(open) {
+    if (open) openSessionSidebar();
+    else closeSessionSidebar();
+}
+
+function setupSessionSidebar() {
+    document.getElementById("sessionToggleBtn").addEventListener("click", openSessionSidebar);
+    document.getElementById("sessionCloseBtn").addEventListener("click", closeSessionSidebar);
+    document.getElementById("sidebarOverlay").addEventListener("click", closeSessionSidebar);
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape") closeSessionSidebar();
+    });
+}
+
+function openUserProfile() {
+    const dropdown = document.getElementById("profileDropdown");
+    dropdown.classList.add("open");
+    dropdown.removeAttribute("inert");
+    dropdown.setAttribute("aria-hidden", "false");
+    document.getElementById("profileToggleBtn").setAttribute("aria-expanded", "true");
+}
+
+function closeUserProfile() {
+    const dropdown = document.getElementById("profileDropdown");
+    dropdown.classList.remove("open");
+    dropdown.setAttribute("inert", "");
+    dropdown.setAttribute("aria-hidden", "true");
+    document.getElementById("profileToggleBtn").setAttribute("aria-expanded", "false");
+}
+
+function toggleUserProfile() {
+    const dropdown = document.getElementById("profileDropdown");
+    if (dropdown.classList.contains("open")) closeUserProfile();
+    else openUserProfile();
+}
+
+function logout() {
+    const logoutUserId = localStorage.getItem("user_id");
+    if (logoutUserId) localStorage.removeItem(`trace_session_${logoutUserId}`);
+
+    [
+        "username",
+        "user_id",
+        "user_email",
+        "email",
+        "auth_provider",
+        "profile_picture",
+        "session_id",
+        "lastInteractionId",
+        "awaitingFeedback"
+    ].forEach(key => localStorage.removeItem(key));
+
+    sessionId = null;
+    sessionSummaries = [];
+    currentSessionMessageCount = 0;
+    currentSessionStatus = null;
+    lastInteractionId = null;
+    awaitingFeedback = false;
+    window.location.href = "/login.html";
+}
+
+function setupUserProfile() {
+    const displayName = user || userEmail || "TRACE User";
+    const providerLabel = authProvider.charAt(0).toUpperCase() + authProvider.slice(1);
+    const avatarImage = document.getElementById("profileAvatarImage");
+    const avatarFallback = document.getElementById("profileAvatarFallback");
+
+    avatarFallback.innerText = displayName.charAt(0).toUpperCase();
+    if (profilePicture) {
+        try {
+            const pictureUrl = new URL(profilePicture);
+            if (pictureUrl.protocol === "https:") {
+                avatarImage.src = pictureUrl.href;
+                avatarImage.hidden = false;
+                avatarFallback.hidden = true;
+                avatarImage.addEventListener("error", () => {
+                    avatarImage.hidden = true;
+                    avatarFallback.hidden = false;
+                }, { once: true });
+            }
+        } catch (error) {
+            // Keep the initial-based avatar when the stored URL is invalid.
+        }
+    }
+    document.getElementById("profileButtonName").innerText = displayName;
+    document.getElementById("profileFullName").innerText = displayName;
+    document.getElementById("profileEmail").innerText = userEmail || "Email unavailable";
+    document.getElementById("profileProvider").innerText = `Provider: ${providerLabel}`;
+
+    document.getElementById("profileToggleBtn").addEventListener("click", toggleUserProfile);
+    document.getElementById("logoutBtn").addEventListener("click", logout);
+    document.addEventListener("click", event => {
+        if (!document.getElementById("profileMenu").contains(event.target)) {
+            closeUserProfile();
+        }
+    });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape") closeUserProfile();
+    });
+}
+
+function formatSessionTime(value) {
+    if (!value) return "No messages yet";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "Recently updated";
+    return date.toLocaleString([], {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+function renderSessionList() {
+    const list = document.getElementById("sessionList");
+    const count = document.getElementById("sessionCount");
+    list.innerHTML = "";
+    count.innerText = `${sessionSummaries.length} chat${sessionSummaries.length === 1 ? "" : "s"}`;
+
+    if (!sessionSummaries.length) {
+        const empty = document.createElement("p");
+        empty.classList.add("session-list-empty");
+        empty.innerText = "No sessions yet";
+        list.appendChild(empty);
+        return;
+    }
+
+    sessionSummaries.forEach(session => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.classList.add("session-list-item");
+        if (session.session_id === sessionId) {
+            button.classList.add("active");
+            button.setAttribute("aria-current", "true");
+        }
+        button.onclick = () => switchSession(session.session_id);
+
+        const title = document.createElement("span");
+        title.classList.add("session-item-title");
+        title.innerText = session.title || "New chat";
+
+        const details = document.createElement("span");
+        details.classList.add("session-item-details");
+
+        const status = document.createElement("span");
+        status.classList.add("session-status-badge");
+        if (session.status === "active") status.classList.add("active");
+        status.innerText = session.status === "active" ? "Active" : "Completed";
+
+        const updated = document.createElement("span");
+        updated.innerText = formatSessionTime(session.updated_at);
+
+        details.appendChild(status);
+        details.appendChild(updated);
+        button.appendChild(title);
+        button.appendChild(details);
+        list.appendChild(button);
+    });
+}
+
+async function refreshSessionList() {
+    const response = await fetch(`/sessions/user/${encodeURIComponent(userId)}`);
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(errorMessage(data, "Sessions could not be loaded."));
+    }
+    sessionSummaries = data.sessions || [];
+    renderSessionList();
+    return sessionSummaries;
+}
+
+async function refreshSessionListQuietly() {
+    try {
+        await refreshSessionList();
+    } catch (error) {
+        showToast(error.message || "Session list could not be refreshed.", "error");
+    }
+}
+
+function setInputEnabled(enabled) {
+    document.getElementById("msg").disabled = !enabled;
+    document.getElementById("sendBtn").disabled = !enabled;
+}
+
+function resetFeedbackForm() {
+    selectedRating = "";
+    selectedCorrectness = "";
+    selectedLengthType = "";
+
+    document
+        .querySelectorAll(".feedback-options button")
+        .forEach(button => button.classList.remove("selected"));
+}
+
+function requireFeedback(interactionId) {
+    if (!interactionId) return;
+    awaitingFeedback = true;
+    lastInteractionId = interactionId;
+    document.getElementById("feedbackPanel").style.display = "block";
+    setInputEnabled(false);
+}
+
+function clearFeedbackState(enableInput = false) {
+    awaitingFeedback = false;
+    lastInteractionId = null;
+    document.getElementById("feedbackPanel").style.display = "none";
+    resetFeedbackForm();
+    setInputEnabled(enableInput);
+}
+
+function initializeChatState() {
+    localStorage.removeItem("lastInteractionId");
+    localStorage.removeItem("awaitingFeedback");
+    clearFeedbackState(false);
+    setNewChatEnabled(false);
+}
+
+function updateSessionStatus(status) {
+    const shortId = sessionId ? sessionId.slice(0, 8) : "none";
+    document.getElementById("sessionStatus").innerText = `Session ${shortId} · ${status}`;
+}
+
+function applySession(session) {
+    sessionId = session.session_id;
+    currentSessionStatus = session.status;
+    const reportedMessageCount = Number(session.message_count);
+    if (Number.isFinite(reportedMessageCount) && reportedMessageCount >= 0) {
+        currentSessionMessageCount = reportedMessageCount;
+    }
+    localStorage.setItem(sessionStorageKey, sessionId);
+    setNewChatEnabled(true);
+    updateSessionStatus(session.status);
+    renderSessionList();
+
+    if (session.status !== "active") {
+        clearFeedbackState(false);
+        showToast("This session has ended. Start a new session to continue.", "info");
+        return;
+    }
+
+    const pendingInteractionId = (
+        session.pending_interaction_id
+        || session.pending_feedback_interaction_id
+        || null
+    );
+    if (pendingInteractionId) {
+        requireFeedback(pendingInteractionId);
+        showToast("Feedback required for the latest response.", "info");
+    } else {
+        clearFeedbackState(true);
+    }
+}
+
+async function fetchSessionHistory(storedSessionId) {
+    const response = await fetch(
+        `/sessions/${encodeURIComponent(storedSessionId)}/messages?user_id=${encodeURIComponent(userId)}`
+    );
+    const data = await response.json();
+
+    if (!response.ok) {
+        const error = new Error(errorMessage(data, "Session history could not be loaded."));
+        error.status = response.status;
+        throw error;
+    }
+    return data;
+}
+
+async function loadSession(selectedSessionId, closeSidebar = true) {
+    const loadSequence = ++sessionLoadSequence;
+    const history = await fetchSessionHistory(selectedSessionId);
+    if (loadSequence !== sessionLoadSequence) return null;
+
+    clearFeedbackState(false);
+    renderChatHistory(history.messages);
+    applySession(history);
+    if (closeSidebar) toggleSessionSidebar(false);
+    return history;
+}
+
+async function switchSession(selectedSessionId) {
+    if (!selectedSessionId) return;
+    if (selectedSessionId === sessionId) {
+        toggleSessionSidebar(false);
+        return;
+    }
+
+    try {
+        await loadSession(selectedSessionId);
+    } catch (error) {
+        showToast(error.message || "Session could not be opened.", "error");
+    }
+}
+
+async function createSession(clearChat = false) {
+    const createSequence = ++sessionLoadSequence;
+    const response = await fetch("/sessions/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(errorMessage(data, "Session could not be created."));
+    if (createSequence !== sessionLoadSequence) {
+        await refreshSessionListQuietly();
+        return data.session;
+    }
+    if (clearChat) renderChatHistory([]);
+    applySession(data.session);
+    await refreshSessionListQuietly();
+    return data.session;
+}
+
+async function initializeChatPage() {
+    const storedSessionId = localStorage.getItem(sessionStorageKey);
+    await refreshSessionListQuietly();
+
+    try {
+        if (storedSessionId) {
+            try {
+                await loadSession(storedSessionId, false);
+                return;
+            } catch (error) {
+                if (error.status !== 403 && error.status !== 404) throw error;
+                localStorage.removeItem(sessionStorageKey);
+            }
+        }
+        await createSession(true);
+    } catch (error) {
+        updateSessionStatus("unavailable");
+        showToast(error.message || "Session service is unavailable.", "error");
+    }
+}
+
+async function startNewChat() {
+    if (
+        sessionId
+        && currentSessionStatus === "active"
+        && currentSessionMessageCount === 0
+    ) {
+        closeSessionSidebar();
+        showToast("Current chat is already empty.", "info");
+        return;
+    }
+
+    setNewChatEnabled(false);
+    try {
+        await createSession(true);
+        toggleSessionSidebar(false);
+        showToast("New chat started.", "success");
+    } catch (error) {
+        showToast(error.message || "Session could not be created.", "error");
+    } finally {
+        if (sessionId) setNewChatEnabled(true);
+    }
+}
+
 async function sendMsg() {
     const input = document.getElementById("msg");
     const sendBtn = document.getElementById("sendBtn");
     const message = input.value.trim();
+    const requestSessionId = sessionId;
 
-    if (!message) return;
+    if (!message || !requestSessionId || awaitingFeedback) return;
 
     addMessage(message, "user");
     input.value = "";
@@ -195,16 +871,33 @@ async function sendMsg() {
             },
             body: JSON.stringify({
                 message: message,
-                session_id: sessionId
+                session_id: requestSessionId,
+                user_id: userId
             })
         });
 
         const data = await res.json();
 
-        console.log("CHAT RESPONSE:", data);
-        console.log("SESSION ID:", sessionId);
+        if (!res.ok) {
+            loadingDiv.remove();
+            if (sessionId !== requestSessionId) return;
+            if (data.detail && data.detail.code === "feedback_required") {
+                requireFeedback(data.detail.interaction_id);
+            } else {
+                setInputEnabled(true);
+            }
+            showToast(errorMessage(data, "Message could not be sent."), "error");
+            return;
+        }
 
-        lastInteractionId = data.interaction_id;
+        if (sessionId !== requestSessionId) {
+            loadingDiv.remove();
+            refreshSessionListQuietly();
+            return;
+        }
+
+        sessionId = data.session_id;
+        localStorage.setItem(sessionStorageKey, sessionId);
 
         loadingDiv.remove();
 
@@ -214,18 +907,20 @@ async function sendMsg() {
 
         typeText(aiDiv, data.llama_response, 15);
 
-        document.getElementById("feedbackPanel").style.display = "block";
+        requireFeedback(data.interaction_id);
+        currentSessionMessageCount += 1;
+        refreshSessionListQuietly();
 
     } catch (error) {
-        loadingDiv.remove();
+        if (loadingDiv.isConnected) loadingDiv.remove();
+        if (sessionId !== requestSessionId) return;
 
         addMessage(
             "Error: Unable to connect to TRACE backend.",
             "ai"
         );
 
-        input.disabled = false;
-        sendBtn.disabled = false;
+        if (!awaitingFeedback) setInputEnabled(true);
     }
 }
 
@@ -270,6 +965,9 @@ async function submitFeedback() {
         return;
     }
 
+    const feedbackInteractionId = lastInteractionId;
+    const feedbackSessionId = sessionId;
+
     try {
         const res = await fetch("/feedback", {
             method: "POST",
@@ -277,36 +975,48 @@ async function submitFeedback() {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                interaction_id: lastInteractionId,
+                interaction_id: feedbackInteractionId,
                 rating: parseInt(selectedRating),
                 correctness: selectedCorrectness,
-                length_type: selectedLengthType
+                length_type: selectedLengthType,
+                user_id: userId,
+                session_id: feedbackSessionId
             })
         });
 
         const data = await res.json();
 
+        if (!res.ok) {
+            showToast(errorMessage(data, "Feedback could not be submitted."), "error");
+            return;
+        }
+
         showToast(data.message, data.success ? "success" : "error");
 
-        if (data.success) {
-            document.getElementById("feedbackPanel").style.display = "none";
-
-            selectedRating = "";
-            selectedCorrectness = "";
-            selectedLengthType = "";
-
-            document
-                .querySelectorAll(".feedback-options button")
-                .forEach(btn => btn.classList.remove("selected"));
-
-            document.getElementById("msg").disabled = false;
-            document.getElementById("sendBtn").disabled = false;
+        if (
+            data.success
+            && sessionId === feedbackSessionId
+            && lastInteractionId === feedbackInteractionId
+        ) {
+            clearFeedbackState(true);
             document.getElementById("msg").focus();
         }
+        if (data.success) refreshSessionListQuietly();
 
     } catch (error) {
         showToast("Feedback could not be submitted. Please try again.", "error");
     }
+}
+
+document.getElementById("msg").addEventListener("keydown", event => {
+    if (event.key === "Enter" && !event.shiftKey) sendMsg();
+});
+
+if (user && userId) {
+    setupSessionSidebar();
+    setupUserProfile();
+    initializeChatState();
+    initializeChatPage();
 }
 </script>
 

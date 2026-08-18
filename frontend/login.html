@@ -3,12 +3,12 @@
 <head>
     <title>TRACE AI Chatbot</title>
 
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/style.css?v=phase2-google-oauth">
 
     <link
         rel="icon"
         type="image/png"
-        href="/yin.png">
+        href="/yin.png?v=official-logo-2">
 </head>
 
 <body>
@@ -24,6 +24,21 @@
 
     <button onclick="login()">Login</button>
 
+    <div class="auth-divider"><span>or</span></div>
+    <button
+        id="googleLoginBtn"
+        class="google-login-btn"
+        type="button"
+        onclick="googleLogin()"
+        aria-describedby="googleLoginStatus"
+        disabled
+    >
+        Continue with Google
+    </button>
+    <p id="googleLoginStatus" class="google-login-status" role="status">
+        Checking Google login availability...
+    </p>
+
     <p class="auth-text">
         No account?
         <a class="auth-link" href="/register.html">Register</a>
@@ -31,6 +46,24 @@
 </div>
 
 <script>
+function storeUserProfile(user) {
+    const previousUserId = localStorage.getItem("user_id");
+
+    if (previousUserId) {
+        localStorage.removeItem(`trace_session_${previousUserId}`);
+    }
+    if (user.user_id && user.user_id !== previousUserId) {
+        localStorage.removeItem(`trace_session_${user.user_id}`);
+    }
+    localStorage.removeItem("session_id");
+
+    localStorage.setItem("username", user.name);
+    localStorage.setItem("user_id", user.user_id);
+    localStorage.setItem("user_email", user.email || "");
+    localStorage.setItem("auth_provider", user.auth_provider || "local");
+    localStorage.setItem("profile_picture", user.profile_picture || "");
+}
+
 function showToast(message, type = "success") {
     const toast = document.getElementById("toastMessage");
 
@@ -68,7 +101,12 @@ async function login() {
         );
 
         if (data.success) {
-            localStorage.setItem("username", data.name);
+            storeUserProfile(data.user || {
+                name: data.name,
+                user_id: data.user_id,
+                email,
+                auth_provider: "local"
+            });
 
             setTimeout(() => {
                 window.location.href = "/index.html";
@@ -79,6 +117,77 @@ async function login() {
         showToast("Unable to connect to TRACE backend.", "error");
     }
 }
+
+function googleLogin() {
+    window.location.href = "/auth/google/login";
+}
+
+async function configureGoogleLogin() {
+    const button = document.getElementById("googleLoginBtn");
+    const status = document.getElementById("googleLoginStatus");
+    try {
+        const response = await fetch("/auth/google/status");
+        const data = await response.json();
+        if (data.enabled) {
+            button.disabled = false;
+            status.innerText = "Google login is available.";
+        } else {
+            status.innerText = data.message || "Google login is not configured. Use local login for now.";
+        }
+    } catch (error) {
+        status.innerText = "Google login status could not be checked. Local login is still available.";
+    }
+}
+
+async function finishGoogleLogin() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("oauth") === "success") {
+        window.history.replaceState({}, "", "/login.html");
+        try {
+            const response = await fetch("/auth/google/session", {
+                method: "GET",
+                credentials: "same-origin",
+                cache: "no-store"
+            });
+            let data = {};
+            try {
+                data = await response.json();
+            } catch (error) {
+                // Keep a friendly fallback when the backend returns a non-JSON error.
+            }
+            if (!response.ok || !data.success || !data.user) {
+                const message = response.status === 401
+                    ? "Google login session expired. Please try again."
+                    : "TRACE.AI could not finish Google login. Please try again.";
+                throw new Error(data.detail || message);
+            }
+
+            storeUserProfile(data.user);
+            showToast("Google login successful", "success");
+            setTimeout(() => {
+                window.location.href = "/index.html";
+            }, 900);
+        } catch (error) {
+            showToast(error.message || "Google login could not be completed. Please try again.", "error");
+        }
+    } else if (params.get("oauth_error")) {
+        const errorMessages = {
+            access_denied: "Google login was cancelled.",
+            invalid_oauth_response: "Google returned an invalid or expired login response.",
+            unverified_google_email: "Google did not provide a verified email address.",
+            google_profile_failed: "The Google profile could not be saved.",
+            google_token_exchange_failed: "TRACE.AI could not complete Google's token exchange. Please try again.",
+            google_userinfo_failed: "TRACE.AI could not retrieve your Google profile. Please try again."
+        };
+        const message = errorMessages[params.get("oauth_error")]
+            || "Google login could not be completed. Use local login.";
+        window.history.replaceState({}, "", "/login.html");
+        showToast(message, "error");
+    }
+}
+
+configureGoogleLogin();
+finishGoogleLogin();
 </script>
 
 </body>

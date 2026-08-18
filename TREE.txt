@@ -1,0 +1,44 @@
+TRACE
+|   .gitignore
+|   README.md
+|   requirements.txt
+|   sample.env
+|   TREE.txt
+|
++---backend
+|   |   app.py
+|   |   main.py
+|   |
+|   +---analytics
+|   |       metrics.py
+|   |
+|   +---database
+|   |       database.py
+|   |
+|   +---routes
+|   |       auth.py
+|   |       chat.py
+|   |       feedback.py
+|   |       sessions.py
+|   |
+|   \---services
+|           chat_storage.py
+|           ollama_service.py
+|           session_service.py
+|           topic_service.py
+|
++---config
+|       database.py
+|
++---frontend
+|       background.js
+|       index.html
+|       login.html
+|       night.gif
+|       register.html
+|       style.css
+|       yin.png
+|
+\---tests
+        test_google_oauth.py
+        test_phase2.py
