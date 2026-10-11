@@ -1,0 +1,8 @@
+{
+  "detail": {
+    "code": "feedback_required",
+    "message": "All interaction feedback must be submitted before ending the session",
+    "pending_feedback_count": 1,
+    "interaction_id": "6ac95bb38a1e699a987173f6"
+  }
+}

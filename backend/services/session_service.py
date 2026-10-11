@@ -122,15 +122,9 @@ def get_session_history(session_id: str, user_id: str):
 
 
 def end_session(session_id: str, user_id: str):
-    session = get_session(session_id, user_id)
-    if session.get("status") == "ended":
-        return session
+    from backend.analytics.finalization import finalize_session
 
-    _database()["sessions"].update_one(
-        {"session_id": session_id, "user_id": user_id},
-        {"$set": {"status": "ended", "updated_at": utc_now()}},
-    )
-    return get_session(session_id, user_id)
+    return finalize_session(session_id, user_id)
 
 
 def record_interaction(session_id: str, user_id: str, topic_label: str):

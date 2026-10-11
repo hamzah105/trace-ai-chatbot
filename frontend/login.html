@@ -130,7 +130,7 @@ async function configureGoogleLogin() {
         const data = await response.json();
         if (data.enabled) {
             button.disabled = false;
-            status.innerText = "Google login is available.";
+            status.innerText = "";
         } else {
             status.innerText = data.message || "Google login is not configured. Use local login for now.";
         }

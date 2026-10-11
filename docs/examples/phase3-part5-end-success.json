@@ -1,0 +1,211 @@
+{
+  "success": true,
+  "session": {
+    "session_id": "session-fr22",
+    "user_id": "owner",
+    "status": "ended",
+    "created_at": "2026-10-10T12:00:00+00:00",
+    "updated_at": "2026-10-10T12:10:00+00:00",
+    "ended_at": "2026-10-10T12:10:00+00:00",
+    "message_count": 6,
+    "summary": "",
+    "topics": [
+      "Machine Learning",
+      "Deep Learning",
+      "Healthcare AI",
+      "Power Systems",
+      "E-commerce AI"
+    ],
+    "finalization": {
+      "is_finalized": true,
+      "finalized_at": "2026-10-10T12:10:00+00:00",
+      "analytics_version": 1
+    },
+    "final_analytics": {
+      "version": 1,
+      "finalized_at": "2026-10-10T12:10:00+00:00",
+      "interaction_count": 6,
+      "overview": {
+        "average_rating": 3,
+        "dominant_length_preference": "To the Point",
+        "strict_correct_percentage": 33.33,
+        "weighted_accuracy_percentage": 50,
+        "average_response_time_seconds": 3.5,
+        "total_interactions": 6,
+        "feedback_submitted_count": 6,
+        "dominant_topic": "Deep Learning"
+      },
+      "metrics": {
+        "summary": {
+          "feedback_submitted_count": 6,
+          "length_scored_count": 6,
+          "correctness_scored_count": 6,
+          "rating_scored_count": 6,
+          "response_time_scored_count": 6,
+          "total_interactions": 6
+        },
+        "correctness": {
+          "incorrect_count": 2,
+          "partial_count": 2,
+          "correct_count": 2,
+          "scored_reply_count": 6,
+          "overall_correctness_score": 0.5,
+          "strict_correct_percentage": 33.33,
+          "overall_correctness_percentage": 50
+        },
+        "response_time": {
+          "average_seconds": 3.5,
+          "median_seconds": 3.5,
+          "minimum_seconds": 1,
+          "maximum_seconds": 6,
+          "count": 6
+        },
+        "ratings": {
+          "average": 3,
+          "distribution": {
+            "1": 0,
+            "2": 2,
+            "3": 2,
+            "4": 2
+          },
+          "count": 6
+        },
+        "accuracy_per_reply": [
+          {
+            "interaction_id": "6ac95bb38a1e699a987173f1",
+            "correctness": "Correct",
+            "accuracy_percentage": 100,
+            "accuracy_score": 1,
+            "phase": "Start",
+            "topic_label": "Machine Learning",
+            "interaction_number": 1
+          },
+          {
+            "interaction_id": "6ac95bb38a1e699a987173f2",
+            "correctness": "Partial",
+            "accuracy_percentage": 50,
+            "accuracy_score": 0.5,
+            "phase": "Start",
+            "topic_label": "Deep Learning",
+            "interaction_number": 2
+          },
+          {
+            "interaction_id": "6ac95bb38a1e699a987173f3",
+            "correctness": "Incorrect",
+            "accuracy_percentage": 0,
+            "accuracy_score": 0,
+            "phase": "Middle",
+            "topic_label": "Deep Learning",
+            "interaction_number": 3
+          },
+          {
+            "interaction_id": "6ac95bb38a1e699a987173f4",
+            "correctness": "Correct",
+            "accuracy_percentage": 100,
+            "accuracy_score": 1,
+            "phase": "Middle",
+            "topic_label": "Healthcare AI",
+            "interaction_number": 4
+          },
+          {
+            "interaction_id": "6ac95bb38a1e699a987173f5",
+            "correctness": "Partial",
+            "accuracy_percentage": 50,
+            "accuracy_score": 0.5,
+            "phase": "End",
+            "topic_label": "Power Systems",
+            "interaction_number": 5
+          },
+          {
+            "interaction_id": "6ac95bb38a1e699a987173f6",
+            "correctness": "Incorrect",
+            "accuracy_percentage": 0,
+            "accuracy_score": 0,
+            "phase": "End",
+            "topic_label": "E-commerce AI",
+            "interaction_number": 6
+          }
+        ],
+        "accuracy_by_topic": [
+          {
+            "scored_interaction_count": 2,
+            "accuracy_percentage": 25,
+            "accuracy_score": 0.25,
+            "interaction_count": 2,
+            "topic_label": "Deep Learning"
+          },
+          {
+            "scored_interaction_count": 1,
+            "accuracy_percentage": 0,
+            "accuracy_score": 0,
+            "interaction_count": 1,
+            "topic_label": "E-commerce AI"
+          },
+          {
+            "scored_interaction_count": 1,
+            "accuracy_percentage": 100,
+            "accuracy_score": 1,
+            "interaction_count": 1,
+            "topic_label": "Healthcare AI"
+          },
+          {
+            "scored_interaction_count": 1,
+            "accuracy_percentage": 100,
+            "accuracy_score": 1,
+            "interaction_count": 1,
+            "topic_label": "Machine Learning"
+          },
+          {
+            "scored_interaction_count": 1,
+            "accuracy_percentage": 50,
+            "accuracy_score": 0.5,
+            "interaction_count": 1,
+            "topic_label": "Power Systems"
+          }
+        ],
+        "accuracy_by_phase": [
+          {
+            "scored_interaction_count": 2,
+            "accuracy_percentage": 75,
+            "accuracy_score": 0.75,
+            "interaction_count": 2,
+            "phase": "Start"
+          },
+          {
+            "scored_interaction_count": 2,
+            "accuracy_percentage": 50,
+            "accuracy_score": 0.5,
+            "interaction_count": 2,
+            "phase": "Middle"
+          },
+          {
+            "scored_interaction_count": 2,
+            "accuracy_percentage": 25,
+            "accuracy_score": 0.25,
+            "interaction_count": 2,
+            "phase": "End"
+          }
+        ],
+        "length_distribution": {
+          "Short": {
+            "percentage": 33.33,
+            "count": 2
+          },
+          "To the Point": {
+            "percentage": 50,
+            "count": 3
+          },
+          "Lengthy": {
+            "percentage": 16.67,
+            "count": 1
+          }
+        }
+      }
+    }
+  },
+  "finalization": {
+    "is_finalized": true,
+    "finalized_at": "2026-10-10T12:10:00+00:00",
+    "analytics_version": 1
+  }
+}

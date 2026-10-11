@@ -1,0 +1,622 @@
+{
+  "success": true,
+  "session": {
+    "session_id": "reference-session",
+    "user_id": "reference-owner",
+    "status": "active",
+    "message_count": 3,
+    "created_at": "2026-10-10T12:00:00+00:00",
+    "updated_at": "2026-10-10T12:02:00+00:00"
+  },
+  "overview": {
+    "total_interactions": 3,
+    "feedback_submitted_count": 3,
+    "weighted_accuracy_percentage": 50,
+    "strict_correct_percentage": 33.33,
+    "average_rating": 3,
+    "average_response_time_seconds": 20,
+    "dominant_topic": "Machine Learning",
+    "dominant_length_preference": "Short"
+  },
+  "metrics": {
+    "summary": {
+      "total_interactions": 3,
+      "feedback_submitted_count": 3,
+      "correctness_scored_count": 3,
+      "rating_scored_count": 3,
+      "length_scored_count": 3,
+      "response_time_scored_count": 3
+    },
+    "accuracy_per_reply": [
+      {
+        "interaction_id": "507f1f77bcf86cd799439011",
+        "interaction_number": 1,
+        "topic_label": "Machine Learning",
+        "phase": "Start",
+        "correctness": "Correct",
+        "accuracy_score": 1,
+        "accuracy_percentage": 100
+      },
+      {
+        "interaction_id": "507f1f77bcf86cd799439012",
+        "interaction_number": 2,
+        "topic_label": "Machine Learning",
+        "phase": "Middle",
+        "correctness": "Partial",
+        "accuracy_score": 0.5,
+        "accuracy_percentage": 50
+      },
+      {
+        "interaction_id": "507f1f77bcf86cd799439013",
+        "interaction_number": 3,
+        "topic_label": "Healthcare AI",
+        "phase": "End",
+        "correctness": "Incorrect",
+        "accuracy_score": 0,
+        "accuracy_percentage": 0
+      }
+    ],
+    "accuracy_by_topic": [
+      {
+        "topic_label": "Healthcare AI",
+        "interaction_count": 1,
+        "scored_interaction_count": 1,
+        "accuracy_score": 0,
+        "accuracy_percentage": 0
+      },
+      {
+        "topic_label": "Machine Learning",
+        "interaction_count": 2,
+        "scored_interaction_count": 2,
+        "accuracy_score": 0.75,
+        "accuracy_percentage": 75
+      }
+    ],
+    "accuracy_by_phase": [
+      {
+        "phase": "Start",
+        "interaction_count": 1,
+        "scored_interaction_count": 1,
+        "accuracy_score": 1,
+        "accuracy_percentage": 100
+      },
+      {
+        "phase": "Middle",
+        "interaction_count": 1,
+        "scored_interaction_count": 1,
+        "accuracy_score": 0.5,
+        "accuracy_percentage": 50
+      },
+      {
+        "phase": "End",
+        "interaction_count": 1,
+        "scored_interaction_count": 1,
+        "accuracy_score": 0,
+        "accuracy_percentage": 0
+      }
+    ],
+    "correctness": {
+      "correct_count": 1,
+      "partial_count": 1,
+      "incorrect_count": 1,
+      "scored_reply_count": 3,
+      "overall_correctness_score": 0.5,
+      "overall_correctness_percentage": 50,
+      "strict_correct_percentage": 33.33
+    },
+    "response_time": {
+      "count": 3,
+      "average_seconds": 20,
+      "minimum_seconds": 10,
+      "maximum_seconds": 30,
+      "median_seconds": 20
+    },
+    "ratings": {
+      "count": 3,
+      "average": 3,
+      "distribution": {
+        "1": 0,
+        "2": 1,
+        "3": 1,
+        "4": 1
+      }
+    },
+    "length_distribution": {
+      "Short": {
+        "count": 1,
+        "percentage": 33.33
+      },
+      "To the Point": {
+        "count": 1,
+        "percentage": 33.33
+      },
+      "Lengthy": {
+        "count": 1,
+        "percentage": 33.33
+      }
+    }
+  },
+  "tables": {
+    "topic_vs_accuracy": {
+      "title": "Topic vs Accuracy",
+      "columns": [
+        {
+          "key": "topic_label",
+          "label": "Topic"
+        },
+        {
+          "key": "interaction_count",
+          "label": "Interactions"
+        },
+        {
+          "key": "scored_interaction_count",
+          "label": "Scored Replies"
+        },
+        {
+          "key": "accuracy_percentage",
+          "label": "Accuracy (%)"
+        }
+      ],
+      "rows": [
+        {
+          "topic_label": "Healthcare AI",
+          "interaction_count": 1,
+          "scored_interaction_count": 1,
+          "accuracy_percentage": 0
+        },
+        {
+          "topic_label": "Machine Learning",
+          "interaction_count": 2,
+          "scored_interaction_count": 2,
+          "accuracy_percentage": 75
+        }
+      ],
+      "row_count": 2
+    },
+    "reply_correctness": {
+      "title": "Reply Correctness",
+      "columns": [
+        {
+          "key": "interaction_number",
+          "label": "Reply #"
+        },
+        {
+          "key": "topic_label",
+          "label": "Topic"
+        },
+        {
+          "key": "phase",
+          "label": "Phase"
+        },
+        {
+          "key": "correctness",
+          "label": "Correctness"
+        },
+        {
+          "key": "accuracy_percentage",
+          "label": "Accuracy (%)"
+        },
+        {
+          "key": "rating",
+          "label": "Rating"
+        },
+        {
+          "key": "length_type",
+          "label": "Length"
+        },
+        {
+          "key": "response_time_seconds",
+          "label": "Response Time (s)"
+        }
+      ],
+      "rows": [
+        {
+          "interaction_number": 1,
+          "interaction_id": "507f1f77bcf86cd799439011",
+          "topic_label": "Machine Learning",
+          "phase": "Start",
+          "correctness": "Correct",
+          "accuracy_percentage": 100,
+          "rating": 4,
+          "length_type": "To the Point",
+          "response_time_seconds": 10,
+          "feedback_submitted": true
+        },
+        {
+          "interaction_number": 2,
+          "interaction_id": "507f1f77bcf86cd799439012",
+          "topic_label": "Machine Learning",
+          "phase": "Middle",
+          "correctness": "Partial",
+          "accuracy_percentage": 50,
+          "rating": 3,
+          "length_type": "Short",
+          "response_time_seconds": 20,
+          "feedback_submitted": true
+        },
+        {
+          "interaction_number": 3,
+          "interaction_id": "507f1f77bcf86cd799439013",
+          "topic_label": "Healthcare AI",
+          "phase": "End",
+          "correctness": "Incorrect",
+          "accuracy_percentage": 0,
+          "rating": 2,
+          "length_type": "Lengthy",
+          "response_time_seconds": 30,
+          "feedback_submitted": true
+        }
+      ],
+      "row_count": 3
+    },
+    "phase_wise_accuracy": {
+      "title": "Phase-wise Accuracy",
+      "columns": [
+        {
+          "key": "phase",
+          "label": "Phase"
+        },
+        {
+          "key": "interaction_count",
+          "label": "Interactions"
+        },
+        {
+          "key": "scored_interaction_count",
+          "label": "Scored Replies"
+        },
+        {
+          "key": "accuracy_percentage",
+          "label": "Accuracy (%)"
+        }
+      ],
+      "rows": [
+        {
+          "phase": "Start",
+          "interaction_count": 1,
+          "scored_interaction_count": 1,
+          "accuracy_percentage": 100
+        },
+        {
+          "phase": "Middle",
+          "interaction_count": 1,
+          "scored_interaction_count": 1,
+          "accuracy_percentage": 50
+        },
+        {
+          "phase": "End",
+          "interaction_count": 1,
+          "scored_interaction_count": 1,
+          "accuracy_percentage": 0
+        }
+      ],
+      "row_count": 3
+    },
+    "response_time_summary": {
+      "title": "Response Time Summary",
+      "columns": [
+        {
+          "key": "metric",
+          "label": "Metric"
+        },
+        {
+          "key": "seconds",
+          "label": "Seconds"
+        }
+      ],
+      "rows": [
+        {
+          "metric": "Average",
+          "seconds": 20
+        },
+        {
+          "metric": "Minimum",
+          "seconds": 10
+        },
+        {
+          "metric": "Maximum",
+          "seconds": 30
+        },
+        {
+          "metric": "Median",
+          "seconds": 20
+        }
+      ],
+      "row_count": 4,
+      "valid_response_count": 3
+    },
+    "rating_distribution": {
+      "title": "Rating Distribution",
+      "columns": [
+        {
+          "key": "rating",
+          "label": "Rating"
+        },
+        {
+          "key": "count",
+          "label": "Count"
+        },
+        {
+          "key": "percentage",
+          "label": "Percentage (%)"
+        }
+      ],
+      "rows": [
+        {
+          "rating": 1,
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "rating": 2,
+          "count": 1,
+          "percentage": 33.33
+        },
+        {
+          "rating": 3,
+          "count": 1,
+          "percentage": 33.33
+        },
+        {
+          "rating": 4,
+          "count": 1,
+          "percentage": 33.33
+        }
+      ],
+      "row_count": 4
+    },
+    "length_preference": {
+      "title": "Length Preference",
+      "columns": [
+        {
+          "key": "length_type",
+          "label": "Length"
+        },
+        {
+          "key": "count",
+          "label": "Count"
+        },
+        {
+          "key": "percentage",
+          "label": "Percentage (%)"
+        }
+      ],
+      "rows": [
+        {
+          "length_type": "Short",
+          "count": 1,
+          "percentage": 33.33
+        },
+        {
+          "length_type": "To the Point",
+          "count": 1,
+          "percentage": 33.33
+        },
+        {
+          "length_type": "Lengthy",
+          "count": 1,
+          "percentage": 33.33
+        }
+      ],
+      "row_count": 3
+    }
+  },
+  "charts": {
+    "topic_distribution": {
+      "title": "Topic Distribution",
+      "type": "pie",
+      "labels": [
+        "Healthcare AI",
+        "Machine Learning"
+      ],
+      "datasets": [
+        {
+          "label": "Interactions",
+          "values": [
+            1,
+            2
+          ]
+        }
+      ],
+      "empty": false,
+      "metadata": {
+        "unit": "count",
+        "y_min": 0,
+        "total_interactions": 3,
+        "total_count": 3
+      }
+    },
+    "accuracy_per_topic": {
+      "title": "Accuracy per Topic",
+      "type": "bar",
+      "labels": [
+        "Healthcare AI",
+        "Machine Learning"
+      ],
+      "datasets": [
+        {
+          "label": "Accuracy (%)",
+          "values": [
+            0,
+            75
+          ]
+        }
+      ],
+      "empty": false,
+      "metadata": {
+        "unit": "percent",
+        "y_min": 0,
+        "y_max": 100
+      }
+    },
+    "accuracy_vs_phase": {
+      "title": "Accuracy vs Phase",
+      "type": "line",
+      "labels": [
+        "Start",
+        "Middle",
+        "End"
+      ],
+      "datasets": [
+        {
+          "label": "Accuracy (%)",
+          "values": [
+            100,
+            50,
+            0
+          ]
+        }
+      ],
+      "empty": false,
+      "metadata": {
+        "unit": "percent",
+        "y_min": 0,
+        "y_max": 100
+      }
+    },
+    "correctness_per_reply": {
+      "title": "Correctness per Reply",
+      "type": "bar",
+      "labels": [
+        "Reply 1",
+        "Reply 2",
+        "Reply 3"
+      ],
+      "datasets": [
+        {
+          "label": "Accuracy (%)",
+          "values": [
+            100,
+            50,
+            0
+          ]
+        }
+      ],
+      "empty": false,
+      "metadata": {
+        "unit": "percent",
+        "y_min": 0,
+        "y_max": 100,
+        "points": [
+          {
+            "interaction_id": "507f1f77bcf86cd799439011",
+            "interaction_number": 1,
+            "topic_label": "Machine Learning",
+            "phase": "Start",
+            "correctness": "Correct"
+          },
+          {
+            "interaction_id": "507f1f77bcf86cd799439012",
+            "interaction_number": 2,
+            "topic_label": "Machine Learning",
+            "phase": "Middle",
+            "correctness": "Partial"
+          },
+          {
+            "interaction_id": "507f1f77bcf86cd799439013",
+            "interaction_number": 3,
+            "topic_label": "Healthcare AI",
+            "phase": "End",
+            "correctness": "Incorrect"
+          }
+        ]
+      }
+    },
+    "response_time_trend": {
+      "title": "Response Time Trend",
+      "type": "line",
+      "labels": [
+        "Reply 1",
+        "Reply 2",
+        "Reply 3"
+      ],
+      "datasets": [
+        {
+          "label": "Response Time (s)",
+          "values": [
+            10,
+            20,
+            30
+          ]
+        }
+      ],
+      "empty": false,
+      "metadata": {
+        "unit": "seconds",
+        "y_min": 0,
+        "average_seconds": 20,
+        "points": [
+          {
+            "interaction_id": "507f1f77bcf86cd799439011",
+            "interaction_number": 1
+          },
+          {
+            "interaction_id": "507f1f77bcf86cd799439012",
+            "interaction_number": 2
+          },
+          {
+            "interaction_id": "507f1f77bcf86cd799439013",
+            "interaction_number": 3
+          }
+        ]
+      }
+    },
+    "rating_distribution": {
+      "title": "Rating Distribution",
+      "type": "bar",
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "datasets": [
+        {
+          "label": "Ratings",
+          "values": [
+            0,
+            1,
+            1,
+            1
+          ]
+        }
+      ],
+      "empty": false,
+      "metadata": {
+        "unit": "count",
+        "y_min": 0,
+        "average_rating": 3,
+        "total_count": 3
+      }
+    },
+    "length_preference": {
+      "title": "Length Preference",
+      "type": "pie",
+      "labels": [
+        "Short",
+        "To the Point",
+        "Lengthy"
+      ],
+      "datasets": [
+        {
+          "label": "Responses",
+          "values": [
+            1,
+            1,
+            1
+          ]
+        }
+      ],
+      "empty": false,
+      "metadata": {
+        "unit": "count",
+        "y_min": 0,
+        "percentages": [
+          33.33,
+          33.33,
+          33.33
+        ],
+        "total_count": 3
+      }
+    }
+  }
+}

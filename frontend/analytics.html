@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TRACE Analytics</title>
+    <link rel="icon" type="image/png" href="/yin.png?v=official-logo-2">
+    <link rel="stylesheet" href="/style.css?v=phase2-google-oauth">
+    <link rel="stylesheet" href="/analytics.css?v=phase3-part5">
+    <script src="/background.js" defer></script>
+    <script src="/analytics.js?v=phase3-part5" defer></script>
+</head>
+<body class="chat-page analytics-page">
+    <div class="cosmic-background" aria-hidden="true">
+        <canvas id="starCanvas"></canvas>
+        <div class="nebula nebula-one"></div>
+        <div class="nebula nebula-two"></div>
+        <div class="nebula nebula-three"></div>
+        <div class="saturn-scene" id="saturnScene">
+            <div class="orbital-halo"></div>
+            <svg class="saturn-art" viewBox="0 0 1000 620" xmlns="http://www.w3.org/2000/svg" focusable="false">
+                <defs>
+                    <radialGradient id="analyticsSaturn" cx="29%" cy="23%" r="78%">
+                        <stop offset="0%" stop-color="#f0d9a5"/>
+                        <stop offset="48%" stop-color="#c9a46a"/>
+                        <stop offset="83%" stop-color="#b8894f"/>
+                        <stop offset="100%" stop-color="#6f4a2d"/>
+                    </radialGradient>
+                    <linearGradient id="analyticsRings">
+                        <stop offset="0%" stop-color="#d8cfbf" stop-opacity=".12"/>
+                        <stop offset="45%" stop-color="#fff0cd" stop-opacity=".72"/>
+                        <stop offset="70%" stop-color="#e8d2a8" stop-opacity=".55"/>
+                        <stop offset="100%" stop-color="#c3b8a4" stop-opacity=".12"/>
+                    </linearGradient>
+                    <clipPath id="analyticsPlanetClip"><circle cx="500" cy="286" r="188"/></clipPath>
+                    <clipPath id="analyticsFrontClip"><path d="M0 398 L1000 202 L1000 620 L0 620 Z"/></clipPath>
+                    <g id="analyticsRingPaths" fill="none" transform="rotate(-11 500 302)">
+                        <ellipse cx="500" cy="302" rx="414" ry="98" stroke="url(#analyticsRings)" stroke-width="17"/>
+                        <ellipse cx="500" cy="302" rx="389" ry="90" stroke="url(#analyticsRings)" stroke-width="25"/>
+                        <ellipse cx="500" cy="302" rx="349" ry="77" stroke="#fff0cd" stroke-opacity=".5" stroke-width="13"/>
+                    </g>
+                </defs>
+                <g class="saturn-ring-group saturn-ring-back"><use href="#analyticsRingPaths"/></g>
+                <g class="saturn-planet-svg">
+                    <circle cx="500" cy="286" r="188" fill="url(#analyticsSaturn)"/>
+                    <g clip-path="url(#analyticsPlanetClip)" fill="none" opacity=".28">
+                        <path d="M300 207 C410 193 593 221 700 202" stroke="#fff0c7" stroke-width="16"/>
+                        <path d="M294 252 C405 231 594 270 705 250" stroke="#91613a" stroke-width="12"/>
+                        <path d="M294 303 C400 282 600 321 707 296" stroke="#fff0c7" stroke-width="14"/>
+                        <path d="M309 357 C410 341 585 383 694 356" stroke="#75472d" stroke-width="14"/>
+                    </g>
+                </g>
+                <g class="saturn-ring-group saturn-ring-front" clip-path="url(#analyticsFrontClip)"><use href="#analyticsRingPaths"/></g>
+            </svg>
+        </div>
+        <div class="cosmic-grid"></div>
+        <div class="space-vignette"></div>
+    </div>
+
+    <main class="analytics-shell">
+        <header class="analytics-header glass-panel">
+            <div class="analytics-brand">
+                <img src="/yin.png?v=official-logo-2" alt="TRACE.AI logo" width="44" height="44">
+                <div><p class="eyebrow">TRACE.AI / SESSION INSIGHTS</p><h1>TRACE Analytics</h1></div>
+            </div>
+            <div class="analytics-controls">
+                <label for="analyticsSession">Session</label>
+                <select id="analyticsSession" disabled aria-label="Select a chat session"><option>Loading sessions…</option></select>
+                <button id="analyticsRefresh" type="button">Refresh</button>
+                <a class="analytics-button" href="/index.html">Back to Chat</a>
+            </div>
+        </header>
+
+        <div id="analyticsMessage" class="analytics-message" role="status" aria-live="polite">Loading your sessions…</div>
+
+        <section aria-labelledby="overviewHeading" class="analytics-section">
+            <div class="section-title"><div><p class="eyebrow">AT A GLANCE</p><h2 id="overviewHeading">Session overview</h2><div id="finalizationStatus" class="finalization-status" role="status" aria-live="polite" hidden></div></div><p id="sessionContext">Choose a session to see its analytics.</p></div>
+            <div id="overviewCards" class="overview-grid"></div>
+        </section>
+
+        <section aria-labelledby="chartsHeading" class="analytics-section">
+            <div class="section-title"><div><p class="eyebrow">VISUAL ANALYSIS</p><h2 id="chartsHeading">Charts</h2></div></div>
+            <div id="analyticsCharts" class="charts-grid"></div>
+        </section>
+
+        <section aria-labelledby="tablesHeading" class="analytics-section">
+            <div class="section-title"><div><p class="eyebrow">DETAILED BREAKDOWN</p><h2 id="tablesHeading">Tables</h2></div></div>
+            <div id="analyticsTables" class="tables-grid"></div>
+        </section>
+    </main>
+</body>
+</html>

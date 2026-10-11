@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from backend.database.database import get_database
 from backend.services.chat_storage import save_chat
+from backend.services.session_lifecycle import session_lifecycle
 from backend.services.ollama_service import (
     OllamaServiceError,
     OllamaTimeoutError,
@@ -122,92 +123,69 @@ def session_http_error(error):
 
 @router.post("/chat")
 def chat(request: ChatRequest):
-    request_start_time = utc_now()
-    start_counter = time.perf_counter()
     session_id = request.session_id or str(uuid.uuid4())
+    with session_lifecycle(session_id):
+        try:
+            ensure_active_session(session_id, request.user_id)
+            pending_feedback = get_pending_feedback(session_id, request.user_id)
+        except (SessionOwnershipError, SessionEndedError, RuntimeError) as error:
+            raise session_http_error(error) from error
 
-    try:
-        ensure_active_session(session_id, request.user_id)
-        pending_feedback = get_pending_feedback(session_id, request.user_id)
-    except (SessionOwnershipError, SessionEndedError, RuntimeError) as error:
-        raise session_http_error(error) from error
+        if pending_feedback:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "code": "feedback_required",
+                    "message": "Submit feedback for the previous response before sending another message.",
+                    "interaction_id": str(pending_feedback["_id"]),
+                },
+            )
 
-    if pending_feedback:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail={
-                "code": "feedback_required",
-                "message": "Submit feedback for the previous response before sending another message.",
-                "interaction_id": str(pending_feedback["_id"]),
+        request_start_time = utc_now()
+        start_counter = time.perf_counter()
+        try:
+            final_prompt = build_context_prompt(session_id, request.user_id, request.message)
+            ai_response = generate_response(final_prompt)
+        except OllamaTimeoutError as error:
+            raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+                                detail=str(error)) from error
+        except OllamaServiceError as error:
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                                detail=str(error)) from error
+        except RuntimeError as error:
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                                detail=str(error)) from error
+
+        response_end_time = utc_now()
+        response_time_seconds = round(time.perf_counter() - start_counter, 3)
+        topic_label = classify_topic(request.message, ai_response)
+        chat_data = {
+            "session_id": session_id, "user_id": request.user_id,
+            "user_message": request.message, "llama_response": ai_response,
+            "timestamp": request_start_time,
+            "request_start_time": request_start_time,
+            "response_end_time": response_end_time,
+            "response_time_seconds": response_time_seconds,
+            "response_time": response_time_seconds,
+            "topic_label": topic_label,
+            "feedback": {
+                "rating": None, "correctness": None, "length_type": None,
+                "submitted": False, "submitted_at": None,
             },
-        )
+        }
+        try:
+            inserted_id = save_chat(chat_data)
+            record_interaction(session_id, request.user_id, topic_label)
+        except (RuntimeError, SessionNotFoundError) as error:
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                                detail="Interaction could not be stored") from error
 
-    try:
-        final_prompt = build_context_prompt(
-            session_id,
-            request.user_id,
-            request.message,
-        )
-        ai_response = generate_response(final_prompt)
-    except OllamaTimeoutError as error:
-        raise HTTPException(
-            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-            detail=str(error),
-        ) from error
-    except OllamaServiceError as error:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=str(error),
-        ) from error
-    except RuntimeError as error:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=str(error),
-        ) from error
-
-    response_end_time = utc_now()
-    response_time_seconds = round(time.perf_counter() - start_counter, 3)
-    topic_label = classify_topic(request.message, ai_response)
-
-    chat_data = {
-        "session_id": session_id,
-        "user_id": request.user_id,
-        "user_message": request.message,
-        "llama_response": ai_response,
-        "timestamp": request_start_time,
-        "request_start_time": request_start_time,
-        "response_end_time": response_end_time,
-        "response_time_seconds": response_time_seconds,
-        # Retained for Phase 1 compatibility.
-        "response_time": response_time_seconds,
-        "topic_label": topic_label,
-        "feedback": {
-            "rating": None,
-            "correctness": None,
-            "length_type": None,
-            "submitted": False,
-            "submitted_at": None,
-        },
-    }
-
-    try:
-        inserted_id = save_chat(chat_data)
-        record_interaction(session_id, request.user_id, topic_label)
-    except (RuntimeError, SessionNotFoundError) as error:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Interaction could not be stored",
-        ) from error
-
-    return {
-        "interaction_id": str(inserted_id),
-        "session_id": session_id,
-        "user_id": request.user_id,
-        "user_message": request.message,
-        "llama_response": ai_response,
-        "request_start_time": request_start_time.isoformat(),
-        "response_end_time": response_end_time.isoformat(),
-        "response_time_seconds": response_time_seconds,
-        "response_time": response_time_seconds,
-        "topic_label": topic_label,
-    }
+        return {
+            "interaction_id": str(inserted_id), "session_id": session_id,
+            "user_id": request.user_id, "user_message": request.message,
+            "llama_response": ai_response,
+            "request_start_time": request_start_time.isoformat(),
+            "response_end_time": response_end_time.isoformat(),
+            "response_time_seconds": response_time_seconds,
+            "response_time": response_time_seconds, "topic_label": topic_label,
+        }

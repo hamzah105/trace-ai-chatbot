@@ -11,6 +11,23 @@
         href="/yin.png?v=official-logo-2">
 
     <script src="/background.js" defer></script>
+    <style>
+        .session-end-control { margin: 10px 0 2px; }
+        .session-end-control button { width: 100%; padding: 11px; border: 1px solid rgba(251, 113, 133, .45); border-radius: 10px; background: rgba(85, 35, 72, .65); color: #ffe1e7; font: inherit; cursor: pointer; }
+        .session-end-control button:hover:not(:disabled) { background: rgba(120, 45, 85, .8); }
+        .session-end-control button:disabled { opacity: .55; cursor: not-allowed; }
+        .session-end-control small { display: block; margin: 5px 2px 0; color: #d8c9e8; line-height: 1.35; }
+        .session-end-dialog[hidden] { display: none; }
+        .session-end-dialog { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; padding: 18px; background: rgba(3, 0, 12, .78); }
+        .session-end-card { width: min(420px, 100%); padding: 24px; border: 1px solid rgba(204, 174, 255, .38); border-radius: 18px; background: #17102b; color: #f5efff; box-shadow: 0 20px 60px rgba(0, 0, 0, .55); }
+        .session-end-card h2 { margin: 0 0 12px; font-size: 1.3rem; }
+        .session-end-card p { margin: 0 0 22px; line-height: 1.5; color: #ddd0ed; }
+        .session-end-buttons { display: flex; justify-content: flex-end; gap: 10px; }
+        .session-end-buttons button { padding: 10px 14px; border: 1px solid rgba(204, 174, 255, .4); border-radius: 9px; background: #352454; color: #fff; font: inherit; cursor: pointer; }
+        .session-end-buttons #confirmEndSessionBtn { background: #773655; border-color: #b96b89; }
+        .session-end-buttons button:disabled { opacity: .6; cursor: wait; }
+        .session-end-card :focus-visible, .session-end-control button:focus-visible { outline: 2px solid #e9d5ff; outline-offset: 3px; }
+    </style>
 </head>
 
 <body class="chat-page">
@@ -196,6 +213,13 @@
         disabled
     >+ New Chat</button>
 
+    <a href="/analytics.html" class="sidebar-new-chat" style="display:block;text-align:center;text-decoration:none;color:inherit;border-radius:10px">View Analytics</a>
+
+    <div class="session-end-control">
+        <button id="endSessionBtn" type="button" disabled>End Session</button>
+        <small id="endSessionHint" role="status" aria-live="polite"></small>
+    </div>
+
     <div id="sessionList" class="session-list" aria-live="polite">
         <p class="session-list-empty">Loading sessions...</p>
     </div>
@@ -333,12 +357,31 @@
 
 </div>
 
+<div id="endSessionDialog" class="session-end-dialog" role="dialog" aria-modal="true" aria-labelledby="endSessionTitle" aria-describedby="endSessionWarning" hidden>
+    <div class="session-end-card">
+        <h2 id="endSessionTitle">End this session?</h2>
+        <p id="endSessionWarning">Once finalized, no new messages or feedback can be added. The final analytics summary will be stored permanently.</p>
+        <div class="session-end-buttons">
+            <button id="cancelEndSessionBtn" type="button">Cancel</button>
+            <button id="confirmEndSessionBtn" type="button">End Session</button>
+        </div>
+    </div>
+</div>
+
 <script>
 let sessionId = null;
 let sessionSummaries = [];
 let sessionLoadSequence = 0;
 let currentSessionMessageCount = 0;
 let currentSessionStatus = null;
+let currentSessionFinalized = false;
+let sessionLoading = false;
+const chatRequestSessions = new Set();
+const feedbackRequestSessions = new Set();
+const endRequestSessions = new Set();
+const confirmedEndedSessions = new Map();
+let endDialogSessionId = null;
+let endDialogReturnFocus = null;
 
 let lastInteractionId = null;
 let awaitingFeedback = false;
@@ -495,7 +538,8 @@ function setupSessionSidebar() {
     document.getElementById("sessionCloseBtn").addEventListener("click", closeSessionSidebar);
     document.getElementById("sidebarOverlay").addEventListener("click", closeSessionSidebar);
     document.addEventListener("keydown", event => {
-        if (event.key === "Escape") closeSessionSidebar();
+        if (event.key === "Escape" && document.getElementById("endSessionDialog").hidden)
+            closeSessionSidebar();
     });
 }
 
@@ -541,6 +585,7 @@ function logout() {
     sessionSummaries = [];
     currentSessionMessageCount = 0;
     currentSessionStatus = null;
+    currentSessionFinalized = false;
     lastInteractionId = null;
     awaitingFeedback = false;
     window.location.href = "/login.html";
@@ -631,8 +676,9 @@ function renderSessionList() {
 
         const status = document.createElement("span");
         status.classList.add("session-status-badge");
-        if (session.status === "active") status.classList.add("active");
-        status.innerText = session.status === "active" ? "Active" : "Completed";
+        const sessionStatus = confirmedEndedSessions.has(session.session_id) ? "ended" : session.status;
+        if (sessionStatus === "active") status.classList.add("active");
+        status.innerText = sessionStatus === "active" ? "Active" : "Completed";
 
         const updated = document.createElement("span");
         updated.innerText = formatSessionTime(session.updated_at);
@@ -665,8 +711,132 @@ async function refreshSessionListQuietly() {
 }
 
 function setInputEnabled(enabled) {
-    document.getElementById("msg").disabled = !enabled;
-    document.getElementById("sendBtn").disabled = !enabled;
+    const available = enabled && currentSessionStatus === "active"
+        && !sessionLoading && !chatRequestSessions.has(sessionId)
+        && !endRequestSessions.has(sessionId) && !awaitingFeedback;
+    document.getElementById("msg").disabled = !available;
+    document.getElementById("sendBtn").disabled = !available;
+}
+
+function updateEndSessionControl() {
+    const button = document.getElementById("endSessionBtn");
+    const hint = document.getElementById("endSessionHint");
+    const active = !!sessionId && currentSessionStatus === "active";
+    button.hidden = !active;
+    button.disabled = !active || sessionLoading || awaitingFeedback
+        || chatRequestSessions.has(sessionId) || feedbackRequestSessions.has(sessionId)
+        || endRequestSessions.has(sessionId);
+    hint.innerText = !active ? "" : awaitingFeedback
+        ? "Submit feedback before ending this session."
+        : endRequestSessions.has(sessionId) ? "Finalizing session…"
+        : sessionLoading || chatRequestSessions.has(sessionId) || feedbackRequestSessions.has(sessionId)
+            ? "Wait for the current request to finish." : "";
+}
+
+function closeEndSessionDialog() {
+    const dialog = document.getElementById("endSessionDialog");
+    if (dialog.hidden) return;
+    dialog.hidden = true;
+    endDialogSessionId = null;
+    const returnFocus = endDialogReturnFocus;
+    endDialogReturnFocus = null;
+    if (returnFocus && !returnFocus.hidden && !returnFocus.disabled) returnFocus.focus();
+    else document.getElementById("sessionToggleBtn").focus();
+}
+
+function openEndSessionDialog() {
+    updateEndSessionControl();
+    const button = document.getElementById("endSessionBtn");
+    if (button.disabled) return;
+    endDialogSessionId = sessionId;
+    endDialogReturnFocus = document.activeElement;
+    document.getElementById("endSessionDialog").hidden = false;
+    document.getElementById("cancelEndSessionBtn").focus();
+}
+
+async function confirmEndSession() {
+    const targetId = endDialogSessionId;
+    updateEndSessionControl();
+    if (!targetId || targetId !== sessionId || document.getElementById("endSessionBtn").disabled) {
+        closeEndSessionDialog();
+        return;
+    }
+    closeEndSessionDialog();
+    endRequestSessions.add(targetId);
+    setInputEnabled(false);
+    updateEndSessionControl();
+    try {
+        const response = await fetch(`/sessions/${encodeURIComponent(targetId)}/end`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: userId })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            if (sessionId === targetId) {
+                showToast(errorMessage(data, "Session could not be ended."), "error");
+                if (response.status === 409) {
+                    const detail = data && typeof data.detail === "object" ? data.detail : null;
+                    const pendingId = detail && (detail.interaction_id || detail.pending_feedback_interaction_id);
+                    if (!sessionLoading) {
+                        try { await loadSession(targetId, false); }
+                        catch (_) { /* The next reload restores feedback. */ }
+                    }
+                    if (pendingId && sessionId === targetId && currentSessionStatus === "active") {
+                        requireFeedback(pendingId);
+                    }
+                }
+            }
+            return;
+        }
+        if (data.session && data.session.status === "ended") {
+            confirmedEndedSessions.set(targetId, {
+                finalized: !!(data.finalization && data.finalization.is_finalized)
+            });
+            if (sessionId === targetId) {
+                currentSessionStatus = "ended";
+                currentSessionFinalized = confirmedEndedSessions.get(targetId).finalized;
+                clearFeedbackState(false);
+                updateSessionStatus("ended");
+                renderSessionList();
+                showToast("Session ended. Final analytics have been saved. Start a new chat to continue.", "success");
+            }
+        }
+        await refreshSessionListQuietly();
+    } catch (error) {
+        if (sessionId === targetId) showToast("Session could not be ended. Please try again.", "error");
+    } finally {
+        endRequestSessions.delete(targetId);
+        setInputEnabled(!awaitingFeedback);
+        updateEndSessionControl();
+    }
+}
+
+function setupEndSessionControl() {
+    document.getElementById("endSessionBtn").addEventListener("click", openEndSessionDialog);
+    document.getElementById("cancelEndSessionBtn").addEventListener("click", closeEndSessionDialog);
+    document.getElementById("confirmEndSessionBtn").addEventListener("click", confirmEndSession);
+    document.getElementById("endSessionDialog").addEventListener("click", event => {
+        if (event.target === event.currentTarget) closeEndSessionDialog();
+    });
+    document.addEventListener("keydown", event => {
+        const dialog = document.getElementById("endSessionDialog");
+        if (dialog.hidden) return;
+        if (event.key === "Escape") {
+            event.preventDefault();
+            closeEndSessionDialog();
+        } else if (event.key === "Tab") {
+            const first = document.getElementById("cancelEndSessionBtn");
+            const last = document.getElementById("confirmEndSessionBtn");
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        }
+    });
 }
 
 function resetFeedbackForm() {
@@ -685,6 +855,7 @@ function requireFeedback(interactionId) {
     lastInteractionId = interactionId;
     document.getElementById("feedbackPanel").style.display = "block";
     setInputEnabled(false);
+    updateEndSessionControl();
 }
 
 function clearFeedbackState(enableInput = false) {
@@ -693,6 +864,7 @@ function clearFeedbackState(enableInput = false) {
     document.getElementById("feedbackPanel").style.display = "none";
     resetFeedbackForm();
     setInputEnabled(enableInput);
+    updateEndSessionControl();
 }
 
 function initializeChatState() {
@@ -704,22 +876,28 @@ function initializeChatState() {
 
 function updateSessionStatus(status) {
     const shortId = sessionId ? sessionId.slice(0, 8) : "none";
-    document.getElementById("sessionStatus").innerText = `Session ${shortId} · ${status}`;
+    const finalText = status === "ended" && currentSessionFinalized ? " · Final analytics saved" : "";
+    document.getElementById("sessionStatus").innerText = `Session ${shortId} · ${status}${finalText}`;
 }
 
 function applySession(session) {
+    closeEndSessionDialog();
     sessionId = session.session_id;
-    currentSessionStatus = session.status;
+    const confirmedEnd = confirmedEndedSessions.get(sessionId);
+    currentSessionStatus = confirmedEnd ? "ended" : session.status;
+    currentSessionFinalized = confirmedEnd
+        ? confirmedEnd.finalized : !!(session.finalization && session.finalization.is_finalized);
     const reportedMessageCount = Number(session.message_count);
     if (Number.isFinite(reportedMessageCount) && reportedMessageCount >= 0) {
         currentSessionMessageCount = reportedMessageCount;
     }
     localStorage.setItem(sessionStorageKey, sessionId);
     setNewChatEnabled(true);
-    updateSessionStatus(session.status);
+    updateSessionStatus(currentSessionStatus);
     renderSessionList();
+    updateEndSessionControl();
 
-    if (session.status !== "active") {
+    if (currentSessionStatus !== "active") {
         clearFeedbackState(false);
         showToast("This session has ended. Start a new session to continue.", "info");
         return;
@@ -754,14 +932,25 @@ async function fetchSessionHistory(storedSessionId) {
 
 async function loadSession(selectedSessionId, closeSidebar = true) {
     const loadSequence = ++sessionLoadSequence;
-    const history = await fetchSessionHistory(selectedSessionId);
-    if (loadSequence !== sessionLoadSequence) return null;
-
-    clearFeedbackState(false);
-    renderChatHistory(history.messages);
-    applySession(history);
-    if (closeSidebar) toggleSessionSidebar(false);
-    return history;
+    closeEndSessionDialog();
+    sessionLoading = true;
+    setInputEnabled(false);
+    updateEndSessionControl();
+    try {
+        const history = await fetchSessionHistory(selectedSessionId);
+        if (loadSequence !== sessionLoadSequence) return null;
+        clearFeedbackState(false);
+        renderChatHistory(history.messages);
+        applySession(history);
+        if (closeSidebar) toggleSessionSidebar(false);
+        return history;
+    } finally {
+        if (loadSequence === sessionLoadSequence) {
+            sessionLoading = false;
+            setInputEnabled(!awaitingFeedback);
+            updateEndSessionControl();
+        }
+    }
 }
 
 async function switchSession(selectedSessionId) {
@@ -780,21 +969,33 @@ async function switchSession(selectedSessionId) {
 
 async function createSession(clearChat = false) {
     const createSequence = ++sessionLoadSequence;
-    const response = await fetch("/sessions/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId })
-    });
-    const data = await response.json();
-    if (!response.ok) throw new Error(errorMessage(data, "Session could not be created."));
-    if (createSequence !== sessionLoadSequence) {
+    closeEndSessionDialog();
+    sessionLoading = true;
+    setInputEnabled(false);
+    updateEndSessionControl();
+    try {
+        const response = await fetch("/sessions/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: userId })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(errorMessage(data, "Session could not be created."));
+        if (createSequence !== sessionLoadSequence) {
+            await refreshSessionListQuietly();
+            return data.session;
+        }
+        if (clearChat) renderChatHistory([]);
+        applySession(data.session);
         await refreshSessionListQuietly();
         return data.session;
+    } finally {
+        if (createSequence === sessionLoadSequence) {
+            sessionLoading = false;
+            setInputEnabled(!awaitingFeedback);
+            updateEndSessionControl();
+        }
     }
-    if (clearChat) renderChatHistory([]);
-    applySession(data.session);
-    await refreshSessionListQuietly();
-    return data.session;
 }
 
 async function initializeChatPage() {
@@ -847,7 +1048,13 @@ async function sendMsg() {
     const message = input.value.trim();
     const requestSessionId = sessionId;
 
-    if (!message || !requestSessionId || awaitingFeedback) return;
+    if (!message || !requestSessionId || awaitingFeedback || currentSessionStatus !== "active"
+        || sessionLoading || chatRequestSessions.has(requestSessionId)
+        || feedbackRequestSessions.has(requestSessionId) || endRequestSessions.has(requestSessionId)) return;
+
+    const requestSequence = sessionLoadSequence;
+    chatRequestSessions.add(requestSessionId);
+    updateEndSessionControl();
 
     addMessage(message, "user");
     input.value = "";
@@ -880,7 +1087,7 @@ async function sendMsg() {
 
         if (!res.ok) {
             loadingDiv.remove();
-            if (sessionId !== requestSessionId) return;
+            if (sessionId !== requestSessionId || requestSequence !== sessionLoadSequence) return;
             if (data.detail && data.detail.code === "feedback_required") {
                 requireFeedback(data.detail.interaction_id);
             } else {
@@ -890,7 +1097,7 @@ async function sendMsg() {
             return;
         }
 
-        if (sessionId !== requestSessionId) {
+        if (sessionId !== requestSessionId || requestSequence !== sessionLoadSequence) {
             loadingDiv.remove();
             refreshSessionListQuietly();
             return;
@@ -913,7 +1120,7 @@ async function sendMsg() {
 
     } catch (error) {
         if (loadingDiv.isConnected) loadingDiv.remove();
-        if (sessionId !== requestSessionId) return;
+        if (sessionId !== requestSessionId || requestSequence !== sessionLoadSequence) return;
 
         addMessage(
             "Error: Unable to connect to TRACE backend.",
@@ -921,6 +1128,10 @@ async function sendMsg() {
         );
 
         if (!awaitingFeedback) setInputEnabled(true);
+    } finally {
+        chatRequestSessions.delete(requestSessionId);
+        setInputEnabled(!awaitingFeedback);
+        updateEndSessionControl();
     }
 }
 
@@ -955,6 +1166,9 @@ function selectFeedback(type, value, button) {
 
 async function submitFeedback() {
 
+    if (currentSessionStatus !== "active" || sessionLoading || !awaitingFeedback
+        || feedbackRequestSessions.has(sessionId) || endRequestSessions.has(sessionId)) return;
+
     if (!selectedRating || !selectedCorrectness || !selectedLengthType) {
         showToast("Please complete all feedback fields.", "error");
         return;
@@ -967,6 +1181,9 @@ async function submitFeedback() {
 
     const feedbackInteractionId = lastInteractionId;
     const feedbackSessionId = sessionId;
+    const feedbackSequence = sessionLoadSequence;
+    feedbackRequestSessions.add(feedbackSessionId);
+    updateEndSessionControl();
 
     try {
         const res = await fetch("/feedback", {
@@ -987,15 +1204,18 @@ async function submitFeedback() {
         const data = await res.json();
 
         if (!res.ok) {
-            showToast(errorMessage(data, "Feedback could not be submitted."), "error");
+            if (sessionId === feedbackSessionId && feedbackSequence === sessionLoadSequence)
+                showToast(errorMessage(data, "Feedback could not be submitted."), "error");
             return;
         }
 
-        showToast(data.message, data.success ? "success" : "error");
+        if (sessionId === feedbackSessionId && feedbackSequence === sessionLoadSequence)
+            showToast(data.message, data.success ? "success" : "error");
 
         if (
             data.success
             && sessionId === feedbackSessionId
+            && feedbackSequence === sessionLoadSequence
             && lastInteractionId === feedbackInteractionId
         ) {
             clearFeedbackState(true);
@@ -1004,7 +1224,11 @@ async function submitFeedback() {
         if (data.success) refreshSessionListQuietly();
 
     } catch (error) {
-        showToast("Feedback could not be submitted. Please try again.", "error");
+        if (sessionId === feedbackSessionId && feedbackSequence === sessionLoadSequence)
+            showToast("Feedback could not be submitted. Please try again.", "error");
+    } finally {
+        feedbackRequestSessions.delete(feedbackSessionId);
+        updateEndSessionControl();
     }
 }
 
@@ -1014,6 +1238,7 @@ document.getElementById("msg").addEventListener("keydown", event => {
 
 if (user && userId) {
     setupSessionSidebar();
+    setupEndSessionControl();
     setupUserProfile();
     initializeChatState();
     initializeChatPage();

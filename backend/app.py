@@ -8,6 +8,7 @@ from backend.routes.auth import router as auth_router
 from backend.database.database import connect_db
 from backend.routes.feedback import router as feedback_router
 from backend.routes.sessions import router as sessions_router
+from backend.routes.analytics import router as analytics_router
 
 
 app = FastAPI(title="TRACE AI Chatbot")
@@ -38,6 +39,7 @@ app.include_router(chat_router)
 app.include_router(auth_router)
 app.include_router(feedback_router)
 app.include_router(sessions_router)
+app.include_router(analytics_router)
 
 
 # ----------------------------

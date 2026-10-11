@@ -10,12 +10,20 @@ TRACE
 |   |   main.py
 |   |
 |   +---analytics
+|   |       __init__.py
+|   |       charts.py
+|   |       dashboard.py
+|   |       data_service.py
+|   |       finalization.py
 |   |       metrics.py
+|   |       snapshot.py
+|   |       tables.py
 |   |
 |   +---database
 |   |       database.py
 |   |
 |   +---routes
+|   |       analytics.py
 |   |       auth.py
 |   |       chat.py
 |   |       feedback.py
@@ -24,13 +32,27 @@ TRACE
 |   \---services
 |           chat_storage.py
 |           ollama_service.py
+|           session_lifecycle.py
 |           session_service.py
 |           topic_service.py
 |
 +---config
 |       database.py
 |
++---docs
+|   |   phase3-part5-validation.md
+|   |
+|   \---examples
+|           phase3-part4-charts.json
+|           phase3-part4-dashboard.json
+|           phase3-part5-end-success.json
+|           phase3-part5-final-session.json
+|           phase3-part5-pending-feedback.json
+|
 +---frontend
+|       analytics.css
+|       analytics.html
+|       analytics.js
 |       background.js
 |       index.html
 |       login.html
@@ -42,3 +64,14 @@ TRACE
 \---tests
         test_google_oauth.py
         test_phase2.py
+        test_phase3_analytics_data.py
+        test_phase3_charts.py
+        test_phase3_dashboard_frontend.py
+        test_phase3_dashboard_routes.py
+        test_phase3_finalization.py
+        test_phase3_finalization_frontend.py
+        test_phase3_finalization_integration.py
+        test_phase3_metrics.py
+        test_phase3_metrics_routes.py
+        test_phase3_tables.py
+        test_phase3_tables_routes.py
