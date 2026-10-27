@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
@@ -35,11 +35,14 @@ connect_db()
 # ----------------------------
 # 3. API ROUTES
 # ----------------------------
-app.include_router(chat_router)
+from backend.services.oomp_security import MemoryOwnerMiddleware, require_memory_owner
+
+app.add_middleware(MemoryOwnerMiddleware)
+app.include_router(chat_router, dependencies=[Depends(require_memory_owner)])
 app.include_router(auth_router)
-app.include_router(feedback_router)
-app.include_router(sessions_router)
-app.include_router(analytics_router)
+app.include_router(feedback_router, dependencies=[Depends(require_memory_owner)])
+app.include_router(sessions_router, dependencies=[Depends(require_memory_owner)])
+app.include_router(analytics_router, dependencies=[Depends(require_memory_owner)])
 
 
 # ----------------------------

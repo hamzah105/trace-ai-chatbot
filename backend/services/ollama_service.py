@@ -29,6 +29,10 @@ def generate_response(prompt: str) -> str:
         }
     }
 
+    if os.getenv("TRACE_OOMP_MODE", "off") != "off":
+        from backend.services.oomp_config import get_configuration
+        payload["options"]["num_ctx"] = get_configuration().num_ctx
+
     try:
         response = requests.post(
             OLLAMA_URL,

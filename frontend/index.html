@@ -565,7 +565,16 @@ function toggleUserProfile() {
     else openUserProfile();
 }
 
-function logout() {
+async function logout() {
+    if (String(document.cookie || "").split(";").some(value => value.trim() === "trace_memory_enabled=1")) {
+        try {
+            const response = await fetch("/auth/oomp/logout", { method: "POST", credentials: "same-origin" });
+            if (!response.ok) throw new Error("logout");
+        } catch (error) {
+            showToast("Could not clear the local memory login. Please retry logout.", "error");
+            return;
+        }
+    }
     const logoutUserId = localStorage.getItem("user_id");
     if (logoutUserId) localStorage.removeItem(`trace_session_${logoutUserId}`);
 

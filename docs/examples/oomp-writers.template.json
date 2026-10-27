@@ -1,0 +1,43 @@
+{
+  "user": {
+    "grant_id": "trace-user",
+    "principal_id": "trace-host",
+    "tenant_id": "trace-local",
+    "namespace": "personal",
+    "source_type": "user",
+    "source_system": "trace-ai",
+    "event_types": [
+      "user_message",
+      "feedback"
+    ],
+    "bearer_token_env": "TRACE_OOMP_USER_TOKEN",
+    "approval_key_env": "TRACE_OOMP_USER_APPROVAL_KEY"
+  },
+  "assistant": {
+    "grant_id": "trace-assistant",
+    "principal_id": "trace-host",
+    "tenant_id": "trace-local",
+    "namespace": "personal",
+    "source_type": "assistant",
+    "source_system": "trace-ai",
+    "event_types": [
+      "assistant_message"
+    ],
+    "bearer_token_env": "TRACE_OOMP_ASSISTANT_TOKEN",
+    "approval_key_env": "TRACE_OOMP_ASSISTANT_APPROVAL_KEY"
+  },
+  "feedback": {
+    "grant_id": "trace-user",
+    "principal_id": "trace-host",
+    "tenant_id": "trace-local",
+    "namespace": "personal",
+    "source_type": "user",
+    "source_system": "trace-ai",
+    "event_types": [
+      "user_message",
+      "feedback"
+    ],
+    "bearer_token_env": "TRACE_OOMP_USER_TOKEN",
+    "approval_key_env": "TRACE_OOMP_USER_APPROVAL_KEY"
+  }
+}

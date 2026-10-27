@@ -1,0 +1,54 @@
+{
+  "database": "REPLACE_WITH_EXTERNAL_OOMP_DATABASE_PATH",
+  "transport": "streamable-http",
+  "profile": "trusted-ingest",
+  "host": "127.0.0.1",
+  "port": 8765,
+  "http_grants": [
+    {
+      "grant_id": "trace-reader",
+      "principal_id": "trace-host",
+      "tenant_id": "trace-local",
+      "namespace": "personal",
+      "capabilities": [
+        "read"
+      ],
+      "bearer_token_env": "TRACE_OOMP_READ_TOKEN"
+    },
+    {
+      "grant_id": "trace-user",
+      "principal_id": "trace-host",
+      "tenant_id": "trace-local",
+      "namespace": "personal",
+      "bearer_token_env": "TRACE_OOMP_USER_TOKEN",
+      "capabilities": [
+        "read",
+        "ingest"
+      ],
+      "ingest_approval_key_env": "TRACE_OOMP_USER_APPROVAL_KEY",
+      "ingest_source_type": "user",
+      "ingest_source_system": "trace-ai",
+      "ingest_event_types": [
+        "user_message",
+        "feedback"
+      ]
+    },
+    {
+      "grant_id": "trace-assistant",
+      "principal_id": "trace-host",
+      "tenant_id": "trace-local",
+      "namespace": "personal",
+      "bearer_token_env": "TRACE_OOMP_ASSISTANT_TOKEN",
+      "capabilities": [
+        "read",
+        "ingest"
+      ],
+      "ingest_approval_key_env": "TRACE_OOMP_ASSISTANT_APPROVAL_KEY",
+      "ingest_source_type": "assistant",
+      "ingest_source_system": "trace-ai",
+      "ingest_event_types": [
+        "assistant_message"
+      ]
+    }
+  ]
+}

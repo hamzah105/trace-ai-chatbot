@@ -2,7 +2,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, Field, field_validator
 
 from backend.database.database import get_database
@@ -48,7 +48,7 @@ def utc_now():
     return datetime.now(timezone.utc)
 
 
-def build_context_prompt(session_id: str, user_id: str, user_message: str):
+def load_recent_context(session_id: str, user_id: str):
     db = get_database()
     if db is None:
         raise RuntimeError("Database is unavailable")
@@ -82,6 +82,10 @@ def build_context_prompt(session_id: str, user_id: str, user_message: str):
     transcript = "\n\n".join(transcript_parts) or "No previous turns in this session."
     feedback_notes = "\n".join(feedback_parts) or "No submitted feedback yet."
 
+    return transcript, feedback_notes
+
+
+def format_context_prompt(transcript, feedback_notes, user_message):
     return f"""
 You are TRACE.AI, a multi-turn chatbot powered by local LLaMA 3.
 
@@ -110,6 +114,11 @@ TRACE RESPONSE:
 """.strip()
 
 
+
+def build_context_prompt(session_id: str, user_id: str, user_message: str):
+    return format_context_prompt(*load_recent_context(session_id, user_id), user_message)
+
+
 def session_http_error(error):
     if isinstance(error, SessionOwnershipError):
         return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
@@ -122,7 +131,7 @@ def session_http_error(error):
 
 
 @router.post("/chat")
-def chat(request: ChatRequest):
+def chat(request: ChatRequest, http_request: Request = None):
     session_id = request.session_id or str(uuid.uuid4())
     with session_lifecycle(session_id):
         try:
@@ -144,7 +153,10 @@ def chat(request: ChatRequest):
         request_start_time = utc_now()
         start_counter = time.perf_counter()
         try:
-            final_prompt = build_context_prompt(session_id, request.user_id, request.message)
+            from backend.services.chat_orchestrator import prepare_prompt
+            scoped_request = request.model_copy(update={"session_id": session_id})
+            final_prompt, oomp_diagnostics = prepare_prompt(
+                scoped_request, http_request, build_context_prompt, load_recent_context, format_context_prompt)
             ai_response = generate_response(final_prompt)
         except OllamaTimeoutError as error:
             raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT,
@@ -173,9 +185,14 @@ def chat(request: ChatRequest):
                 "submitted": False, "submitted_at": None,
             },
         }
+        from backend.services.oomp_publisher import stage_publication, complete_publication
+        if oomp_diagnostics is not None:
+            chat_data["oomp_diagnostics"] = oomp_diagnostics
+        stage_publication(chat_data, http_request)
         try:
             inserted_id = save_chat(chat_data)
             record_interaction(session_id, request.user_id, topic_label)
+            complete_publication(inserted_id, chat_data)
         except (RuntimeError, SessionNotFoundError) as error:
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                                 detail="Interaction could not be stored") from error

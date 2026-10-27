@@ -34,3 +34,9 @@ Thumbs.db
 *.gguf
 *.safetensors
 models/
+# Optional local memory integration credentials, databases and test caches
+.pytest_cache/
+credentials/
+secrets/
+*.local.json
+*.sqlite3-*

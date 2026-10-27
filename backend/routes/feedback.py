@@ -56,6 +56,10 @@ def submit_feedback(request: FeedbackRequest):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Feedback does not belong to this session",
         )
+    from backend.services.oomp_config import get_configuration
+    config = get_configuration()
+    if config.mode != "off" and interaction.get("user_id") != config.owner_id:
+        raise HTTPException(status_code=403, detail="Memory owner mismatch")
     interaction_session_id = interaction.get("session_id")
     interaction_user_id = interaction.get("user_id")
     if not interaction_session_id or not interaction_user_id:
@@ -96,6 +100,8 @@ def submit_feedback(request: FeedbackRequest):
         except (PyMongoError, RuntimeError) as error:
             raise HTTPException(status_code=503, detail="Database is unavailable") from error
 
+    from backend.services.oomp_publisher import schedule_feedback
+    schedule_feedback(interaction_id)
     return {"success": True, "message": "Feedback submitted successfully",
             "interaction_id": request.interaction_id,
             "submitted_at": submitted_at.isoformat()}

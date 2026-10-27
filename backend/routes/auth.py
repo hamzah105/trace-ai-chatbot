@@ -167,7 +167,7 @@ def register(request: RegisterRequest):
 
 
 @router.post("/login")
-def login(request: LoginRequest):
+def login(request: LoginRequest, http_request: Request = None):
     users = database_or_503()["users"]
     user = find_user_by_email(users, request.email)
 
@@ -186,7 +186,8 @@ def login(request: LoginRequest):
 
     users.update_one({"_id": user["_id"]}, {"$set": update})
     user.update(update)
-    return profile_response(user, "Login successful")
+    from backend.services.oomp_security import attach_owner_login
+    return attach_owner_login(profile_response(user, "Login successful"), str(user["_id"]), request=http_request)
 
 
 @router.get("/users/{user_id}")
@@ -597,4 +598,11 @@ def google_session(request: Request):
     response.delete_cookie(OAUTH_LOGIN_COOKIE, path="/auth/google")
     response.headers["Cache-Control"] = "no-store"
     oauth_logger.info("Google OAuth login handoff completed")
-    return response
+    from backend.services.oomp_security import attach_owner_login
+    return attach_owner_login(payload, str(user["_id"]), response=response, request=request)
+
+
+@router.post("/auth/oomp/logout")
+def memory_logout(request: Request):
+    from backend.services.oomp_security import logout_owner
+    return logout_owner(request)

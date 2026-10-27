@@ -1,0 +1,4 @@
+-r requirements.txt
+mcp==2.3.0
+# Keep the client extra compatible with TRACE FastAPI/Starlette.
+sse-starlette>=3.0,<3.1

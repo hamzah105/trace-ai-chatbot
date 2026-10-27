@@ -41,7 +41,7 @@ Session finalization uses a process-local per-session reentrant lock and a condi
 
 ## Setup
 
-Requirements: Python 3.10 or later, MongoDB, and Ollama. From the project root:
+Requirements: Python 3.11 or later, MongoDB, and Ollama. From the project root:
 
 ```powershell
 py -m pip install -r requirements.txt
@@ -108,3 +108,22 @@ See [the Phase 3 Part 5 acceptance report](docs/phase3-part5-validation.md) for 
 ## Attribution
 
 Developed by **M Hamzah Shoaib (BC230200900)** for **CS619, Virtual University of Pakistan**, under the supervision of **Miss Neelam Alam**.
+
+
+## Optional OOMP memory (Stage 8)
+
+TRACE can use the independent OOMP installation through the official MCP SDK 2.3.0 over authenticated loopback Streamable HTTP. Default TRACE_OOMP_MODE=off keeps the original latest-eight prompt, generation API, feedback rules and analytics. No MCP dependency or request is needed in that mode.
+
+The retrieve mode adds validated historical evidence before generation. The retrieve_and_ingest mode also queues explicitly approved, successfully persisted user/assistant/feedback events for a separately launched publication worker. MongoDB remains authoritative; the embedded outbox stores references and retry state, not a second memory database. OOMP's own worker extracts/indexes accepted events separately.
+
+Memory-enabled operation is a pinned single-owner local development profile. Successful existing owner login issues a short-lived HttpOnly owner cookie; local administrative clients can use a separate owner key. Submitted user IDs alone never authorize memory. Other owners are rejected; history/analytics are protected too. This is not production multi-user authentication.
+
+~~~powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-oomp.txt
+.\.venv\Scripts\python.exe -m backend.services.oomp_diagnostics
+~~~
+
+Follow [installation and Windows operation](docs/oomp-integration.md), [security and privacy](docs/oomp-security.md), [executed validation](docs/stage8-validation.md) and the [38-item Stage 8 report](docs/stage-8-report.md). Configuration starts disabled; templates contain environment-variable names, never live credentials.
+
+Stage 8 validation: **216 tests passed**, preserving all 134 earlier tests and adding 82 integration/security cases. The pytest run also reports 55 passing unittest subcases separately. Actual external MCP, isolated MongoDB persistence and two synthetic live llama3 generation checks passed. One upstream Starlette multipart deprecation warning remains. No improved-answer-accuracy claim is made. OOMP source remains unchanged; no Stage 9/10 work, commit or push.
