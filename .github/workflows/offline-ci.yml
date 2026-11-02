@@ -46,6 +46,8 @@ jobs:
           python -m pip install --only-binary=:all: -r requirements-ci.txt
       - name: Check resolved dependencies
         run: python -m pip check
+      - name: Verify exact interpreter ZIP policy
+        run: python -I -S -B tools/test_ci_guard.py
       - name: Verify frozen bytes and run guarded synthetic Python tests
         run: python -I -S -B tools/run_ci.py --selection python --artifacts "${{ runner.temp }}/trace-python-ci"
       - name: Run guarded synthetic frontend tests

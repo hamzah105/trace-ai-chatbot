@@ -32,6 +32,12 @@ ARTIFACT = Path(SPEC['artifact']).resolve()
 PHASE = Path(SPEC['phase']).resolve()
 DEPS = Path(SPEC['dependencies']).resolve()
 BASE = Path(sys.base_prefix).resolve()
+# Keep this lexical under canonical BASE: resolving a candidate symlink must
+# never turn its target into a newly trusted file. Missing archives are normal.
+POSIX_STDLIB_ZIP = (
+    BASE / sys.platlibdir / f'python{sys.version_info.major}{sys.version_info.minor}.zip'
+    if os.name == 'posix' else None
+)
 STDLIB = Path(sysconfig.get_path('stdlib')).resolve()
 BOOTSTRAP = Path(__file__).resolve()
 MARKER = ARTIFACT/'offline-guard-violation.flag'
@@ -135,7 +141,7 @@ def allowed_file(path, writing=False):
         return path.is_relative_to(PHASE)
     if path.is_relative_to(ARTIFACT):
         return True
-    if path.is_relative_to(DEPS) or path.is_relative_to(STDLIB) or path.is_relative_to(BASE/'DLLs') or (path.parent==BASE and path.name.lower() in {'python311.zip','python312.zip'}):
+    if path.is_relative_to(DEPS) or path.is_relative_to(STDLIB) or path.is_relative_to(BASE/'DLLs') or (path.parent==BASE and path.name.lower() in {'python311.zip','python312.zip'}) or path == POSIX_STDLIB_ZIP:
         return True
     if any(path.is_relative_to(ROOT/folder) for folder in ('backend','tests','frontend','docs','config','tools')):
         return True
