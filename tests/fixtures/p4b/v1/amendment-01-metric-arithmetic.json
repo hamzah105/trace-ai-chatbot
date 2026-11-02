@@ -1,0 +1,10 @@
+{
+    "amendment_id":  "p4b.synthetic.v1.amendment.01",
+    "created_utc":  "2026-11-01T21:03:46.0513798Z",
+    "original_manifest_sha256":  "964b23803a06c9f3455010eda3a965299a2e624bc0a0eee088a074516f682b9e",
+    "reason":  "Independent arithmetic typo noticed immediately after freeze, before implementation-derived measurements. The generated scenarios.json numeric gold-pair count is already 16; prose incorrectly says 17.",
+    "canonical_source_recall_micro_gold_pairs":  16,
+    "superseded_prose_value":  17,
+    "inputs_gold_controls_thresholds_changed":  false,
+    "other_denominators_unchanged":  true
+}

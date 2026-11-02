@@ -1,0 +1,181 @@
+{
+    "fixture_version":  "p4b.synthetic.v1",
+    "controls":  [
+                     {
+                         "control_id":  "foreign-owner",
+                         "mutation":  "change owner_id or use foreign source",
+                         "expected":  "Reject before inclusion"
+                     },
+                     {
+                         "control_id":  "foreign-session",
+                         "mutation":  "owned interaction paired with foreign-owned session",
+                         "expected":  "Reject before inclusion"
+                     },
+                     {
+                         "control_id":  "tenant-principal",
+                         "mutation":  "forge returned scope or tenant/principal labels",
+                         "expected":  "Never grant authority from packet scope"
+                     },
+                     {
+                         "control_id":  "wrong-source-system",
+                         "mutation":  "source_system other than configured trace-ai",
+                         "expected":  "Reject"
+                     },
+                     {
+                         "control_id":  "wrong-event-id",
+                         "mutation":  "alter deterministic event identity",
+                         "expected":  "Reject"
+                     },
+                     {
+                         "control_id":  "wrong-session-id",
+                         "mutation":  "alter hashed session identity",
+                         "expected":  "Reject"
+                     },
+                     {
+                         "control_id":  "wrong-turn-id",
+                         "mutation":  "change role or interaction suffix",
+                         "expected":  "Reject"
+                     },
+                     {
+                         "control_id":  "wrong-timestamp",
+                         "mutation":  "offset source timestamp by one second",
+                         "expected":  "Reject"
+                     },
+                     {
+                         "control_id":  "unexpected-locator",
+                         "mutation":  "supply locator where original has none",
+                         "expected":  "Reject"
+                     },
+                     {
+                         "control_id":  "missing-source",
+                         "mutation":  "remove authoritative interaction",
+                         "expected":  "Reject"
+                     },
+                     {
+                         "control_id":  "deleted-session",
+                         "mutation":  "remove authoritative session",
+                         "expected":  "Reject"
+                     },
+                     {
+                         "control_id":  "excluded-source",
+                         "mutation":  "set source publication excluded true",
+                         "expected":  "Reject"
+                     },
+                     {
+                         "control_id":  "retracted-unit",
+                         "mutation":  "mark evidence retracted",
+                         "expected":  "Reject current-use unit"
+                     },
+                     {
+                         "control_id":  "span-negative",
+                         "mutation":  "start below zero",
+                         "expected":  "Reject"
+                     },
+                     {
+                         "control_id":  "span-reversed",
+                         "mutation":  "end before start",
+                         "expected":  "Reject"
+                     },
+                     {
+                         "control_id":  "span-overrun",
+                         "mutation":  "end after source code-point length",
+                         "expected":  "Reject"
+                     },
+                     {
+                         "control_id":  "span-empty",
+                         "mutation":  "equal start and end for claimed quote",
+                         "expected":  "Reject"
+                     },
+                     {
+                         "control_id":  "utf16-span",
+                         "mutation":  "use UTF-16 indices after robot emoji",
+                         "expected":  "Reject when indices do not match code points"
+                     },
+                     {
+                         "control_id":  "byte-span",
+                         "mutation":  "use UTF-8 byte indices for Urdu/CJK",
+                         "expected":  "Reject"
+                     },
+                     {
+                         "control_id":  "wrong-quote",
+                         "mutation":  "one character or normalization changed",
+                         "expected":  "Reject exact quote"
+                     },
+                     {
+                         "control_id":  "duplicate-proof",
+                         "mutation":  "repeat source/span within unit",
+                         "expected":  "Reject malformed duplicate or deduplicate with explicit accounting"
+                     },
+                     {
+                         "control_id":  "unknown-field",
+                         "mutation":  "add source authority field or unknown contract field",
+                         "expected":  "Reject strict wire"
+                     },
+                     {
+                         "control_id":  "packet-outer-mismatch",
+                         "mutation":  "mutate packet unit while outer unit stays original",
+                         "expected":  "Reject entire response"
+                     },
+                     {
+                         "control_id":  "wrong-byte-count",
+                         "mutation":  "declared packet bytes differ by one",
+                         "expected":  "Reject"
+                     },
+                     {
+                         "control_id":  "wrong-call-budget",
+                         "mutation":  "returned budget or max-results does not match requested limits",
+                         "expected":  "Reject"
+                     },
+                     {
+                         "control_id":  "untrusted-flag",
+                         "mutation":  "set source_data_untrusted false",
+                         "expected":  "Reject"
+                     },
+                     {
+                         "control_id":  "project-as-alias",
+                         "mutation":  "project-only evidence offered for alias",
+                         "expected":  "Abstain from alias claim"
+                     },
+                     {
+                         "control_id":  "robot-as-pet",
+                         "mutation":  "robot-only evidence offered for pet",
+                         "expected":  "Abstain from pet claim"
+                     },
+                     {
+                         "control_id":  "hypothetical-as-personal",
+                         "mutation":  "quoted invented character offered as owner fact",
+                         "expected":  "Abstain from owner fact"
+                     },
+                     {
+                         "control_id":  "assistant-as-personal",
+                         "mutation":  "unsupported assistant PHANTOM/MISO statement",
+                         "expected":  "Do not treat as owner assertion"
+                     },
+                     {
+                         "control_id":  "tentative-as-completed",
+                         "mutation":  "proposal offered as completed move",
+                         "expected":  "Abstain from completed move"
+                     },
+                     {
+                         "control_id":  "correction-omitted",
+                         "mutation":  "old proposal without later correction offered as current state",
+                         "expected":  "Preserve temporal uncertainty; never certify completed move"
+                     },
+                     {
+                         "control_id":  "political-affiliation",
+                         "mutation":  "discussion offered as political membership",
+                         "expected":  "Abstain from affiliation"
+                     }
+                 ],
+    "control_count":  33,
+    "zero_tolerance":  [
+                           "unauthorized prompt sources",
+                           "accepted invalid proofs",
+                           "prompt or packet overflow",
+                           "fabricated completed moves",
+                           "fabricated political affiliations",
+                           "duplicate publication writes",
+                           "unreported whole-unit exclusions"
+                       ],
+    "threshold":  "All designated controls must satisfy expected rejection, abstention or explicit uncertainty. Report actual numerator and fixed denominator separately; no deletion after tuning."
+}

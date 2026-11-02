@@ -1,0 +1,112 @@
+{
+    "fixture_version":  "p4b.synthetic.v1",
+    "claims":  [
+                   {
+                       "claim_id":  "project",
+                       "required_sources":  [
+                                                "p4b-source-project"
+                                            ],
+                       "expected":  "The project is ORBIT42.",
+                       "forbidden":  [
+                                         "ORBIT42 is the owner alias"
+                                     ]
+                   },
+                   {
+                       "claim_id":  "alias",
+                       "required_sources":  [
+                                                "p4b-source-alias"
+                                            ],
+                       "expected":  "The explicitly claimed personal alias is NOVA.",
+                       "forbidden":  [
+                                         "ORBIT42",
+                                         "KESTREL",
+                                         "COMET",
+                                         "PHANTOM"
+                                     ]
+                   },
+                   {
+                       "claim_id":  "style",
+                       "required_sources":  [
+                                                "p4b-source-style"
+                                            ],
+                       "expected":  "Concise replies; three bullets when a list is helpful.",
+                       "forbidden":  [
+                                         "Always exactly three bullets"
+                                     ]
+                   },
+                   {
+                       "claim_id":  "robot",
+                       "required_sources":  [
+                                                "p4b-source-robot"
+                                            ],
+                       "expected":  "KESTREL is a tabletop robot prototype.",
+                       "forbidden":  [
+                                         "KESTREL is a pet",
+                                         "KESTREL is the owner alias"
+                                     ]
+                   },
+                   {
+                       "claim_id":  "relocation",
+                       "required_sources":  [
+                                                "p4b-source-relocation-proposal",
+                                                "p4b-source-relocation-correction"
+                                            ],
+                       "expected":  "Tentative Cedar Bay to Larch Haven proposal was cancelled; owner reported remaining in Cedar Bay.",
+                       "forbidden":  [
+                                         "Completed relocation",
+                                         "Owner moved to Larch Haven"
+                                     ]
+                   },
+                   {
+                       "claim_id":  "infrastructure",
+                       "required_sources":  [
+                                                "p4b-source-infrastructure"
+                                            ],
+                       "expected":  "SQLite queue and loopback MCP endpoint are considered design options.",
+                       "forbidden":  [
+                                         "Deployed infrastructure"
+                                     ]
+                   },
+                   {
+                       "claim_id":  "political-affiliation",
+                       "required_sources":  [
+                                                "p4b-source-political-topic"
+                                            ],
+                       "expected":  "Topic was discussed; personal affiliation is unsupported.",
+                       "forbidden":  [
+                                         "Owner supports Civic Lantern",
+                                         "Owner supports River Council"
+                                     ]
+                   },
+                   {
+                       "claim_id":  "pet",
+                       "required_sources":  [
+
+                                            ],
+                       "expected":  "Owner pet information is unknown from authorized personal assertions.",
+                       "forbidden":  [
+                                         "MISO",
+                                         "KESTREL",
+                                         "Owner has no pet"
+                                     ]
+                   },
+                   {
+                       "claim_id":  "unicode",
+                       "required_sources":  [
+                                                "p4b-source-unicode"
+                                            ],
+                       "expected":  "Unicode marker: café é 🤖 اردو 漢字. Keep this exact source text.",
+                       "forbidden":  [
+                                         "UTF-16 offsets",
+                                         "UTF-8 byte offsets"
+                                     ]
+                   }
+               ],
+    "provenance_rules":  [
+                             "Only authenticated owner-scoped Mongo source rows and sessions establish authority.",
+                             "Source role, source-system, timestamp, event/session/turn identifiers, absent locator, exclusion and complete code-point spans must match independently.",
+                             "Supported source linkage does not certify arbitrary derived paraphrase. Derived text stays untrusted and attributed.",
+                             "Political topics, quotes, hypotheticals, assistant assertions and foreign-owner facts are not personal assertions."
+                         ],
+    "fake_answer_scope":  "Assertions on a deterministic answer stub measure orchestration or explicit gold decisions, never natural-language model quality."
+}

@@ -11,7 +11,7 @@ from .oomp_client import OOMPClient, OOMPError
 
 
 def diagnose(config):
-    report = {"mode": config.mode, "configuration_valid": True, "connected": False,
+    report = {"mode": config.mode, "retrieval_api": config.retrieval_api, "configuration_valid": True, "connected": False,
               "evidence_budget_bytes": config.evidence_budget, "max_results": config.max_results,
               "max_prompt_bytes": config.max_prompt_bytes, "timeout_seconds": config.timeout_seconds,
               "ingestion_ready": False}
@@ -21,6 +21,8 @@ def diagnose(config):
     status = client.call("memory.status", {})
     report["connected"] = "read" in status.get("capabilities", [])
     report["protocol"] = client.last_protocol_version
+    report["context_capability_available"] = "memory.context" in client.last_tool_names
+    report["context_contract_expected"] = "oomp.context.v1" if config.retrieval_api == "context_v1" else None
     report["worker_started_by_server"] = status.get("mind_worker_started_by_server")
     if config.mode == "retrieve_and_ingest":
         states = [client.call("memory.status", {}, token=grant.credential()) for grant in config.writers.values()]

@@ -1,9 +1,11 @@
-# TRACE + OOMP integration (Stage 8)
+# TRACE + OOMP integration (Stage 8 and opt-in P4B)
 
 TRACE remains a FastAPI/MongoDB/Ollama application. OOMP remains an independent external product, installed at D:\Desktop\OOMP. TRACE imports no OOMP Python modules, copies no OOMP implementation and opens no OOMP database. Its optional client uses the official MCP SDK 2.3.0 over authenticated loopback Streamable HTTP.
 
-The tested baseline is clean TRACE main 6976c51 (Phase 3 complete), with 134 passing tests. The independent OOMP Stage 7 installation was inspected read-only at bc145c5. See [validation](stage8-validation.md) for exact final results and [security](oomp-security.md) for the trust boundary.
+The historical Stage 8 baseline was clean TRACE main 6976c51 (Phase 3 complete), with 134 passing tests. The independent OOMP Stage 7 installation was inspected read-only at bc145c5. See [validation](stage8-validation.md) for exact final results and [security](oomp-security.md) for the trust boundary.
 
+
+P4B is an explicit optional retrieval API within the existing deployment modes. The latest-eight descriptions and Stage 8 service commands below describe the legacy API, which remains the default. For local P4B offline validation, use the [fictional adapter quickstart](oomp-p4b-fictional-quickstart.md); its reviewed controller blocks real MongoDB, model and external OOMP service access. Historical validation numbers below are not P4B results. Current measured results belong in [the P4B report](product-milestone-P4B-report.md).
 ## Deployment modes
 
 | TRACE_OOMP_MODE | Behavior |
@@ -12,7 +14,7 @@ The tested baseline is clean TRACE main 6976c51 (Phase 3 complete), with 134 pas
 | retrieve | Deterministic MCP retrieval before eligible generation; no publication. |
 | retrieve_and_ingest | Retrieval plus host-approved publication eligibility for newly completed owner interactions. An explicit separate TRACE publication worker delivers queued events. |
 
-Remote chat fields cannot change these modes, credentials or scopes. Invalid enabled configuration fails private requests closed; /health retains its original response. Infrastructure failures during retrieval fall back to the unchanged original prompt, with a sanitized diagnostic. Authorization failures are reported distinctly and never trigger another credential or broader scope.
+Remote chat fields cannot change these modes, credentials or scopes. Invalid enabled configuration fails private requests closed; /health retains its original response. With the default legacy retrieval API, infrastructure failures during retrieval fall back to the unchanged original prompt, with a sanitized diagnostic. Opt-in P4B uses the bounded context fallback described below. Authorization failures are reported distinctly and never trigger another credential or broader scope.
 
 ## Install in TRACE's environment
 
@@ -92,7 +94,7 @@ Start TRACE with its existing single-worker entry point:
 
 Keep the original single-application-worker limit for session_lifecycle/finalization. No cloud deployment, tunnel, public listener or proxy trust is introduced.
 
-## Retrieval, prompt composition and budgets
+## Retrieval, prompt composition and budgets (legacy API)
 
 Each eligible /chat request first retains the original session ownership/status and pending-feedback guards. It obtains the same last-eight interactions and feedback guidance from MongoDB. Retrieval is controlled by the host before generation, never by an LLM tool decision.
 
@@ -167,7 +169,7 @@ Before delivery, an owner administrator can persist a no-publication marker:
 
 Excluded records cannot be reconsented by backfill or reconciliation, and their evidence is rejected in prompt validation. Exclusion is not remote erasure and cannot recall already accepted/in-flight events. OOMP's privileged erasure/conflict approval remain external local administration, never model tools.
 
-## Reproduce the synthetic demonstrations
+## Reproduce the synthetic demonstrations (historical Stage 8)
 
 ~~~powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
@@ -180,3 +182,75 @@ Tests launch the independent external OOMP executable with -B, create temporary 
 The central test captures actual baseline and memory-enabled prompts in data/stage8-artifacts/long-history-demo.json. It proves the early project fact is absent from latest-eight context and present with original provenance after MCP retrieval, while all eight recent turns remain. Its model response is mocked; it does not claim a baseline model must answer incorrectly. Separate live llama3 smoke results are recorded in validation.
 
 See [official SDK client transports](https://py.sdk.modelcontextprotocol.io/client/transports/) for upstream context; the authoritative local Stage 7 contract is the separately installed OOMP documentation. No desktop-host, public OAuth, multi-user or answer-accuracy certification is implied.
+## P4B explicit context.v1 selection
+
+P4B adds the trusted server setting `TRACE_OOMP_RETRIEVAL_API`:
+
+| Value | Behavior |
+| --- | --- |
+| `retrieve` (default) | Existing `memory.retrieve` path, latest-eight prompt, legacy fallback and size behavior. |
+| `context_v1` | Opt in to `memory.context` with strict `oomp.context.v1` parsing, independent Mongo proof validation and finite adaptive allocation. |
+
+The selector does not enable memory. `TRACE_OOMP_MODE=off` remains the original prompt/model path and ignores optional integration settings. The two existing enabled modes retain their meanings: `retrieve` reads only; `retrieve_and_ingest` additionally stages consented successful new interactions through the existing outbox. Selecting context changes neither the publisher policy identity nor signatures, source roles, consent, event IDs, retries, leases or fences. It does not start a worker or publish data during retrieval.
+
+An administrator opts in only through the trusted TRACE server environment after provisioning the existing owner pin, loopback settings and dedicated read grant. HTTP request fields cannot select an API, grant, tenant, namespace, principal, source ID or arbitrary recent-user hint. Unknown enabled selector values fail configuration validation. Old deployments are never upgraded automatically.
+
+The client discovers `memory.context` through the existing authenticated MCP lifecycle and validates its advertised schema. It then independently checks the exact version, allowed fields and types, finite scores, counters, status/coverage, matching proof identities, packet/outer equality and UTF-8 byte accounting. Returned `token_budget` must equal the actual per-call request and returned evidence count must fit `max_results`. Duplicate JSON packet keys, malformed or duplicate proofs and mismatched source-reference order are rejected. Reason codes are bounded identifiers; they do not establish authority. Degraded results require the existing explicit `TRACE_OOMP_ALLOW_DEGRADED` policy.
+
+No legacy downgrade or alternate credential is attempted when context is disabled, unavailable, unsupported or denied. The request omits `include_source_content`, uses `graph_depth=0` and `explain=false`, and accepts neither a `source_evidence` result nor unsolicited raw proof quotes or a query plan. The adapter does not upgrade its read credential to `read_source`. Any separately requested raw-source detail would require a real server grant and is outside this adapter. Authorized original conversation text is reconstructed from MongoDB instead of trusting a remote raw-source claim.
+
+## P4B source authority and temporal limits
+
+MongoDB remains the authority for TRACE interactions and sessions. Before rendering every historical proof, TRACE verifies the authenticated pinned owner, canonical Mongo ObjectId, an original interaction under that owner, an owner-linked session, configured `trace-ai` source system, deterministic role-specific event and turn identities, session hash, exact timestamp and absent locator. It rejects missing, foreign, unlinked or excluded sources. Naive BSON UTC timestamps are normalized to aware UTC in temporary views without rewriting stored records. Spans use Python Unicode code points, never UTF-16 positions or UTF-8 byte offsets.
+
+The source validator checks original role content: user message, assistant response, or the exact existing sorted compact feedback serialization. Submitted feedback keeps its original attribution and timing. Feedback evaluates an assistant answer; it does not independently verify a user's factual claim.
+
+Only complete original role source content is rendered in the prompt, with source interaction/event/memory IDs, source reference, validated span, role and uncertainty. An apparently correct substring can omit surrounding negation; rendering the full source preserves that context. Arbitrary OOMP `content` paraphrases, object labels, similarity scores and model answers are never promoted to independently verified facts or rendered as factual authority. Duplicate complete sources can be accounted for without discarding distinct conflicting source content or uncertainty annotations.
+
+A retracted unit is rejected. A superseded unit is accepted only for explicit `historical_correction` retrieval and remains labeled historical, never current-state authority. Tentative, contradicted, corrected and uncertain material retains its supplied temporal/assertion metadata. Exact source linkage proves attribution and span integrity, not semantic entailment, complete correction coverage or external truth. An unseen correction can still be absent from a remote result. The prompt instructs the answer model to preserve negation, chronology, quoted/hypothetical origin and role; it does not certify the model's compliance. Project names do not establish aliases; robot discussion does not establish pet ownership; political topics do not establish affiliation, nationality, ethnicity or beliefs.
+
+## P4B adaptive allocation and fallback
+
+Context mode keeps the original session lifecycle lock, active-session ownership and pending-feedback checks before retrieval or generation. It loads at most 32 owner/session-scoped complete exchanges, excluding publication-excluded records. If that bounded scan omits older rows, the count outside the window is reported as unknown. Omission counters explicitly apply to the loaded window.
+
+The allocator first reserves fixed instructions, the complete current user message, and the latest complete exchange with its submitted feedback. It reserves an evidence share before adding a deterministic newest suffix of whole older exchanges. Where useful and affordable, it may include at most two complete original user turns from omitted exchanges selected by finite exact query-term overlap. These are labeled older extractive source views, with original IDs, timestamp and full span, omitted assistant-response attribution and feedback target. They are not generated summaries or proofs of semantic relevance.
+
+At most two complete recent-user hints, totaling at most 2048 UTF-8 bytes, come from the loaded authorized current session. Assistant answers, feedback, client-supplied IDs and cross-session identifiers are not hints. Oversized whole hints are omitted, never clipped.
+
+There are three separate capacity measures:
+
+| Measure | Meaning |
+| --- | --- |
+| OOMP `token_budget` / returned packet bytes | UTF-8 bytes of the complete serialized context packet only. The per-call budget may be below the configured evidence maximum. |
+| TRACE final prompt bytes | Actual UTF-8 length of instructions, current message, complete recent context, selected full historical sources, JSON escaping, labels and separators. |
+| TRACE `prompt_token_upper_bound` | Conservative one-byte-per-token accounting proxy. It is not a tokenizer measurement or a tested model-context capability. |
+
+TRACE remeasures each whole provenance-validated source unit after rendering. A small remote packet may reference a large authoritative Mongo source; the full source can therefore be excluded even when its transport packet fits. Text and proof stay together. The final prompt must satisfy both the configured byte cap and `prompt_token_upper_bound + generation_reserve + 256 <= num_ctx`. Existing defaults remain 7000 prompt bytes, 8192 context allowance and 512 generation reserve; enabled model generation retains `num_predict=140`. Increasing a configured allowance does not demonstrate that hardware or a model can support it.
+
+Whole discretionary units/exchanges are omitted deterministically and exclusions are reported. A long session can proceed with fewer complete exchanges under this opt-in policy. If the complete mandatory minimum cannot fit, TRACE returns HTTP 413 before retrieval or generation. The current message and factual assertions are never byte-truncated. The public 5000-character request bound remains unchanged; oversized public input can fail request validation with HTTP 422 before reaching allocation. Existing legacy latest-eight 413 behavior is unchanged.
+
+| Context outcome | Meaning presented to the answer model |
+| --- | --- |
+| `found_relevant_evidence` | Source-validated historical evidence was selected. Its contents remain attributed source statements. |
+| `no_relevant_evidence` | This query returned no relevant evidence; it does not establish absence of past conversation. |
+| `budget_excluded` | Relevant evidence or additional context could not fit as complete units. |
+| `index_incomplete` / `coverage_unknown` | Coverage is partial or unknown; no exhaustive-history claim is justified. |
+| `candidate_uncertain` | Evidence is uncertain or potentially conflicting and requires cautious attribution. |
+| `context_disabled` / `context_unsupported` | The remote tool is unavailable by configuration or capability/version support. |
+| `unavailable` / `timeout` | Retrieval failed or exceeded its deadline; historical absence is unproven. |
+| `unauthorized` | Access was denied; no alternate or broader grant is attempted. |
+| `invalid_evidence` / `source_validation_unavailable` | Wire/provenance validation failed or authoritative source validation could not complete. |
+
+Malformed status/evidence combinations fail closed. Retrieval failure uses a bounded current/recent-context prompt with truthful status and no remote historical content. It does not restore an oversized latest-eight prompt or say that no earlier conversation exists. If the mandatory recent-source view itself cannot be validated, TRACE fails the request rather than consuming unverified rows.
+
+Diagnostics record finite API/status/count/byte/timing values, coverage, loaded-window exclusions, compaction/deduplication counts and sanitized failure codes. They omit raw prompts, source text, query text and credentials. Retrieval time, pre-generation orchestration time and complete chat time have distinct meanings. The successful public chat schema, original OAuth flow and feedback contracts remain unchanged.
+
+## P4B offline validation scope
+
+The fictional three-session fixture freezes source rows, gold evidence, workloads and 33 negative controls before implementation tuning. A separately preserved amendment corrects the prose denominator from 17 to the actual 16 source-case gold pairs without changing inputs or gold. The mocked MCP selections test adapter retention and rejection, not actual OOMP ranking. Complete original sources are independently checked against mongomock records. Actual chat persistence, feedback and outbox behavior use only disposable fictional storage and deterministic fake responses.
+
+Source recall/precision, continuity and temporal-correction measures describe evidence present in the final prompt. The conservative fake answer explicitly declines personal assertions, so its abstention and false-assertion counts do not certify natural-language reasoning. UTF-8 bytes and the byte-based token proxy do not measure the LLaMA tokenizer. Mocked retrieval/orchestration latency does not measure actual service or inference speed. Exact results, failures, skips, resource evidence and remaining limitations belong in the P4B report.
+
+The reviewed experimental controller supplies offline access guards, synthetic environment, resource monitoring, cancellation and owned-process cleanup. Those are validation-harness controls, not newly shipped TRACE runtime protection. Existing Windows crash evidence remains historical; these tests cannot establish that a BSOD cause was resolved.
+
+A later real LLaMA evaluation requires separate owner authorization, a fresh resource preflight, fixed workload and approved live-service boundaries. It is not part of the offline quickstart. The roadmap's second independent MCP host example also remains required before final P4 acceptance; the TRACE adapter alone does not complete that requirement. No P5, release or deployment approval follows from this local milestone.

@@ -18,6 +18,9 @@ def prepare_prompt(request, http_request, baseline_builder, context_loader, base
         return baseline_builder(request.session_id, request.user_id, request.message), None
     if not verified_owner(http_request, request.user_id, config):
         raise HTTPException(status_code=403, detail="Verified local memory owner required")
+    if config.retrieval_api == 'context_v1':
+        from .oomp_adaptive_context import prepare_context_prompt
+        return prepare_context_prompt(request, config, get_database())
     transcript, feedback = context_loader(request.session_id, request.user_id)
     baseline = baseline_formatter(transcript, feedback, request.message)
     if len(baseline.encode("utf-8")) > config.max_prompt_bytes:

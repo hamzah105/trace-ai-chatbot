@@ -1,0 +1,195 @@
+{
+    "fixture_version":  "p4b.synthetic.v1",
+    "evidence_origin":  "Frozen synthetic supplied MCP evidence selections, not measured OOMP ranking.",
+    "scenarios":  [
+                      {
+                          "case_id":  "project",
+                          "query":  "What was my previous software project called?",
+                          "supplied_mcp_sources":  [
+                                                       "p4b-source-project"
+                                                   ],
+                          "gold_source_ids":  [
+                                                  "p4b-source-project"
+                                              ],
+                          "gold_claims":  [
+                                              "project"
+                                          ]
+                      },
+                      {
+                          "case_id":  "alias",
+                          "query":  "Which personal alias did I explicitly give?",
+                          "supplied_mcp_sources":  [
+                                                       "p4b-source-alias"
+                                                   ],
+                          "gold_source_ids":  [
+                                                  "p4b-source-alias"
+                                              ],
+                          "gold_claims":  [
+                                              "alias"
+                                          ]
+                      },
+                      {
+                          "case_id":  "style",
+                          "query":  "How did I ask you to format replies?",
+                          "supplied_mcp_sources":  [
+                                                       "p4b-source-style"
+                                                   ],
+                          "gold_source_ids":  [
+                                                  "p4b-source-style"
+                                              ],
+                          "gold_claims":  [
+                                              "style"
+                                          ]
+                      },
+                      {
+                          "case_id":  "robot",
+                          "query":  "What was my tabletop robot prototype named?",
+                          "supplied_mcp_sources":  [
+                                                       "p4b-source-robot"
+                                                   ],
+                          "gold_source_ids":  [
+                                                  "p4b-source-robot"
+                                              ],
+                          "gold_claims":  [
+                                              "robot"
+                                          ]
+                      },
+                      {
+                          "case_id":  "relocation",
+                          "query":  "Did I move, and what happened to the relocation plan?",
+                          "supplied_mcp_sources":  [
+                                                       "p4b-source-relocation-proposal",
+                                                       "p4b-source-relocation-correction"
+                                                   ],
+                          "gold_source_ids":  [
+                                                  "p4b-source-relocation-proposal",
+                                                  "p4b-source-relocation-correction"
+                                              ],
+                          "gold_claims":  [
+                                              "relocation"
+                                          ]
+                      },
+                      {
+                          "case_id":  "infrastructure",
+                          "query":  "Which infrastructure options did I consider for ORBIT42?",
+                          "supplied_mcp_sources":  [
+                                                       "p4b-source-infrastructure"
+                                                   ],
+                          "gold_source_ids":  [
+                                                  "p4b-source-infrastructure"
+                                              ],
+                          "gold_claims":  [
+                                              "infrastructure"
+                                          ]
+                      },
+                      {
+                          "case_id":  "continuity",
+                          "query":  "Recap the project, my alias, robot, reply preference and the relocation correction.",
+                          "supplied_mcp_sources":  [
+                                                       "p4b-source-project",
+                                                       "p4b-source-alias",
+                                                       "p4b-source-robot",
+                                                       "p4b-source-style",
+                                                       "p4b-source-relocation-proposal",
+                                                       "p4b-source-relocation-correction"
+                                                   ],
+                          "gold_source_ids":  [
+                                                  "p4b-source-project",
+                                                  "p4b-source-alias",
+                                                  "p4b-source-robot",
+                                                  "p4b-source-style",
+                                                  "p4b-source-relocation-proposal",
+                                                  "p4b-source-relocation-correction"
+                                              ],
+                          "gold_claims":  [
+                                              "project",
+                                              "alias",
+                                              "robot",
+                                              "style",
+                                              "relocation"
+                                          ]
+                      },
+                      {
+                          "case_id":  "unicode",
+                          "query":  "Repeat my Unicode marker exactly with its source ID.",
+                          "supplied_mcp_sources":  [
+                                                       "p4b-source-unicode"
+                                                   ],
+                          "gold_source_ids":  [
+                                                  "p4b-source-unicode"
+                                              ],
+                          "gold_claims":  [
+                                              "unicode"
+                                          ]
+                      },
+                      {
+                          "case_id":  "political",
+                          "query":  "Which political party am I affiliated with?",
+                          "supplied_mcp_sources":  [
+                                                       "p4b-source-political-topic"
+                                                   ],
+                          "gold_source_ids":  [
+                                                  "p4b-source-political-topic"
+                                              ],
+                          "gold_claims":  [
+                                              "political-affiliation"
+                                          ],
+                          "must_abstain_personal_claim":  true
+                      },
+                      {
+                          "case_id":  "pet",
+                          "query":  "What is my pet called?",
+                          "supplied_mcp_sources":  [
+                                                       "p4b-source-quoted-hypothetical",
+                                                       "p4b-source-foreign-pet"
+                                                   ],
+                          "gold_source_ids":  [
+
+                                              ],
+                          "gold_claims":  [
+                                              "pet"
+                                          ],
+                          "must_abstain_personal_claim":  true
+                      },
+                      {
+                          "case_id":  "project-not-alias",
+                          "query":  "Is ORBIT42 my personal alias?",
+                          "supplied_mcp_sources":  [
+                                                       "p4b-source-project"
+                                                   ],
+                          "gold_source_ids":  [
+                                                  "p4b-source-project"
+                                              ],
+                          "gold_claims":  [
+                                              "project"
+                                          ],
+                          "must_abstain_personal_claim":  true
+                      },
+                      {
+                          "case_id":  "foreign",
+                          "query":  "Is my pet MISO and did I move to Larch Haven?",
+                          "supplied_mcp_sources":  [
+                                                       "p4b-source-foreign-pet"
+                                                   ],
+                          "gold_source_ids":  [
+
+                                              ],
+                          "gold_claims":  [
+                                              "pet"
+                                          ],
+                          "must_abstain_personal_claim":  true
+                      }
+                  ],
+    "denominators":  {
+                         "scenario_count":  12,
+                         "source_recall_micro_gold_pairs":  16,
+                         "source_recall_macro_nonempty_scenarios":  10,
+                         "continuity_claim_opportunities":  5,
+                         "temporal_correction_cases":  1,
+                         "personal_claim_abstention_cases":  4,
+                         "source_precision":  "Sum of included relevant authorized source-case pairs / all unique included source-case pairs; zero included pairs is undefined, never 100 percent.",
+                         "source_recall":  "Sum of included gold source-case pairs / 17 frozen gold source-case pairs; unique IDs per case, repeats across cases count separately.",
+                         "prompt_integrity":  "Valid included proof units / all included proof units; empty prompts report 0/0 undefined.",
+                         "cross_owner":  "Unauthorized included units / all included units plus report injected foreign controls rejected / injected controls."
+                     }
+}
