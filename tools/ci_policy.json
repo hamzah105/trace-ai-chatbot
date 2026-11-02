@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "excluded": {
+    "tests/test_oomp_context.py::test_actual_invalid_mcp_credentials_are_explicit": "External OOMP MCP installation and listener",
+    "tests/test_oomp_end_to_end.py::test_actual_client_discovery_and_status": "External OOMP MCP installation and listener",
+    "tests/test_oomp_end_to_end.py::test_long_history_baseline_vs_mcp_with_original_latest_eight": "External OOMP MCP, worker and SQLite store",
+    "tests/test_oomp_end_to_end.py::test_wrong_credential_scope_response_is_rejected_over_real_mcp": "External OOMP MCP and worker",
+    "tests/test_oomp_end_to_end.py::test_independent_sync_clients_own_separate_async_lifecycles": "External OOMP MCP installation and listener",
+    "tests/test_oomp_feedback.py::test_owner_cross_session_recall_requires_stored_owner_link": "External OOMP MCP and worker",
+    "tests/test_oomp_publisher.py::test_real_mcp_roles_idempotency_feedback_and_approval_tampering": "External OOMP MCP, worker and SQLite store",
+    "tests/test_oomp_publisher.py::test_actual_service_outage_restart_and_durable_replay": "External OOMP MCP restart and SQLite store",
+    "tests/test_oomp_publisher.py::test_real_mongo_outbox_survives_client_reopen_and_replay": "Physical MongoDB port27017 read/write/drop"
+  },
+  "frontend_files": [
+    "tests/test_phase3_dashboard_frontend.py",
+    "tests/test_phase3_finalization_frontend.py"
+  ],
+  "metadata_normalized_sha256": {
+    "manifest.json": "71a78424a6413862ed7bd41ea57f033a7412d3601dc383604d6a7e32ee6d8696",
+    "amendment-01-metric-arithmetic.json": "346b5fa6c50f8676ee882e554f282fcba3f15eaf0a6126bb8bdca7a9c604ff0d"
+  }
+}
