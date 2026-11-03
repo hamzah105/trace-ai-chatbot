@@ -1,0 +1,38 @@
+{
+    "fixture_version":  "p4b.synthetic.v1",
+    "freeze_utc":  "2026-11-01T21:01:48.0185376Z",
+    "baseline_sha":  "af202ef43daf70280d2e8915210816f788e8aff1",
+    "immutable_policy":  "Do not tune frozen v1 after implementation. Amend in a separately versioned fixture.",
+    "files":  [
+                  {
+                      "file":  "gold.json",
+                      "bytes":  6019,
+                      "sha256":  "6837b13c983cc4057922de862391e8fc5c3352770547e29bf384878165d0bdd8"
+                  },
+                  {
+                      "file":  "negative-controls.json",
+                      "bytes":  9029,
+                      "sha256":  "836f36d076602d11d157c68800921877581346cabc3c9b585349d669b8ab3a3e"
+                  },
+                  {
+                      "file":  "preregistration.md",
+                      "bytes":  5246,
+                      "sha256":  "4f20aaf8496a3713c9c682387e88ac1f887278aeb8144892239d6246bdd47864"
+                  },
+                  {
+                      "file":  "scenarios.json",
+                      "bytes":  11093,
+                      "sha256":  "58a318c408f080b4bf947270ff1dd7913dcfad7ac7c3eb178904f800b14ad766"
+                  },
+                  {
+                      "file":  "sources.json",
+                      "bytes":  20698,
+                      "sha256":  "bf7f5f1f5b0fcb6c8e2f98fa030be2ab3014b7b781b3e8c1ed52d82e051d6c6f"
+                  },
+                  {
+                      "file":  "workloads.json",
+                      "bytes":  207966,
+                      "sha256":  "3a5c465e98260b66bad9da7224a1e384cccc2efe395005f519c4ccb08c7c1706"
+                  }
+              ]
+}

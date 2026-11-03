@@ -49,6 +49,7 @@ class WriterGrant(ValueModel):
 
 class OOMPConfiguration(ValueModel):
     mode: Literal["off", "retrieve", "retrieve_and_ingest"] = "off"
+    retrieval_api: Literal["retrieve", "context_v1"] = "retrieve"
     url: str = "http://127.0.0.1:8765/mcp"
     origin: str = "http://127.0.0.1:8000"
     owner_id: str = Field(default="", max_length=200)
@@ -132,6 +133,7 @@ def get_configuration():
             "url": "URL", "origin": "TRACE_ORIGIN", "owner_id": "OWNER_ID", "tenant_id": "TENANT_ID",
             "namespace": "NAMESPACE", "principal_id": "PRINCIPAL_ID", "source_system": "SOURCE_SYSTEM",
             "read_token": "READ_TOKEN", "owner_key": "OWNER_KEY", "retrieval_mode": "RETRIEVAL_MODE",
+            "retrieval_api": "RETRIEVAL_API",
         }
         for field, suffix in names.items():
             key = "TRACE_OOMP_" + suffix

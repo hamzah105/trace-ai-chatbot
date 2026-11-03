@@ -1,0 +1,319 @@
+{
+    "fixture_version":  "p4b.synthetic.v1",
+    "created_before_tuning":  true,
+    "fictional":  true,
+    "owner_id":  "000000000000000000000101",
+    "foreign_owner_id":  "000000000000000000000202",
+    "sessions":  [
+                     {
+                         "session_id":  "p4b-session-0",
+                         "owner_id":  "000000000000000000000101",
+                         "status":  "ended"
+                     },
+                     {
+                         "session_id":  "p4b-session-1",
+                         "owner_id":  "000000000000000000000101",
+                         "status":  "ended"
+                     },
+                     {
+                         "session_id":  "p4b-session-2",
+                         "owner_id":  "000000000000000000000101",
+                         "status":  "active"
+                     },
+                     {
+                         "session_id":  "p4b-foreign-session",
+                         "owner_id":  "000000000000000000000202",
+                         "status":  "ended"
+                     }
+                 ],
+    "interactions":  [
+                         {
+                             "source_id":  "p4b-source-project",
+                             "interaction_id":  "000000000000000000001001",
+                             "owner_id":  "000000000000000000000101",
+                             "session_id":  "p4b-session-0",
+                             "request_start_time":  "2026-09-01T10:00:00Z",
+                             "response_end_time":  "2026-09-01T10:00:01Z",
+                             "user_message":  "I am building a fictional software project called ORBIT42. ORBIT42 is the project name, not my personal alias.",
+                             "assistant_message":  "I will treat ORBIT42 as your project name.",
+                             "feedback":  {
+                                              "submitted":  true,
+                                              "rating":  4,
+                                              "correctness":  "Correct",
+                                              "length_type":  "To the Point",
+                                              "submitted_at":  "2026-09-01T10:00:02Z"
+                                          },
+                             "publication":  {
+                                                 "approved":  true,
+                                                 "ready":  true,
+                                                 "excluded":  false
+                                             },
+                             "source_system":  "trace-ai",
+                             "locator":  null
+                         },
+                         {
+                             "source_id":  "p4b-source-style",
+                             "interaction_id":  "000000000000000000001002",
+                             "owner_id":  "000000000000000000000101",
+                             "session_id":  "p4b-session-1",
+                             "request_start_time":  "2026-09-02T10:00:00Z",
+                             "response_end_time":  "2026-09-02T10:00:01Z",
+                             "user_message":  "Please keep your replies concise and use three bullets when a list is helpful.",
+                             "assistant_message":  "Understood: concise replies, with three bullets when useful.",
+                             "feedback":  {
+                                              "submitted":  true,
+                                              "rating":  4,
+                                              "correctness":  "Correct",
+                                              "length_type":  "To the Point",
+                                              "submitted_at":  "2026-09-02T10:00:02Z"
+                                          },
+                             "publication":  {
+                                                 "approved":  true,
+                                                 "ready":  true,
+                                                 "excluded":  false
+                                             },
+                             "source_system":  "trace-ai",
+                             "locator":  null
+                         },
+                         {
+                             "source_id":  "p4b-source-robot",
+                             "interaction_id":  "000000000000000000001003",
+                             "owner_id":  "000000000000000000000101",
+                             "session_id":  "p4b-session-1",
+                             "request_start_time":  "2026-09-02T10:01:00Z",
+                             "response_end_time":  "2026-09-02T10:01:01Z",
+                             "user_message":  "My tabletop robot prototype is named KESTREL. It is a robot project, not an animal or my own nickname.",
+                             "assistant_message":  "KESTREL is your tabletop robot prototype.",
+                             "feedback":  {
+                                              "submitted":  true,
+                                              "rating":  4,
+                                              "correctness":  "Correct",
+                                              "length_type":  "To the Point",
+                                              "submitted_at":  "2026-09-02T10:01:02Z"
+                                          },
+                             "publication":  {
+                                                 "approved":  true,
+                                                 "ready":  true,
+                                                 "excluded":  false
+                                             },
+                             "source_system":  "trace-ai",
+                             "locator":  null
+                         },
+                         {
+                             "source_id":  "p4b-source-alias",
+                             "interaction_id":  "000000000000000000001004",
+                             "owner_id":  "000000000000000000000101",
+                             "session_id":  "p4b-session-1",
+                             "request_start_time":  "2026-09-02T10:02:00Z",
+                             "response_end_time":  "2026-09-02T10:02:01Z",
+                             "user_message":  "In this fictional test, I use NOVA as my personal alias. ORBIT42 and KESTREL are project names.",
+                             "assistant_message":  "Your stated personal alias is NOVA.",
+                             "feedback":  {
+                                              "submitted":  true,
+                                              "rating":  4,
+                                              "correctness":  "Correct",
+                                              "length_type":  "To the Point",
+                                              "submitted_at":  "2026-09-02T10:02:02Z"
+                                          },
+                             "publication":  {
+                                                 "approved":  true,
+                                                 "ready":  true,
+                                                 "excluded":  false
+                                             },
+                             "source_system":  "trace-ai",
+                             "locator":  null
+                         },
+                         {
+                             "source_id":  "p4b-source-relocation-proposal",
+                             "interaction_id":  "000000000000000000001005",
+                             "owner_id":  "000000000000000000000101",
+                             "session_id":  "p4b-session-1",
+                             "request_start_time":  "2026-09-02T10:03:00Z",
+                             "response_end_time":  "2026-09-02T10:03:01Z",
+                             "user_message":  "I may relocate from Cedar Bay to Larch Haven next spring, but this is only a tentative plan. I have not moved.",
+                             "assistant_message":  "That is a tentative relocation plan, not a completed move.",
+                             "feedback":  {
+                                              "submitted":  true,
+                                              "rating":  4,
+                                              "correctness":  "Correct",
+                                              "length_type":  "To the Point",
+                                              "submitted_at":  "2026-09-02T10:03:02Z"
+                                          },
+                             "publication":  {
+                                                 "approved":  true,
+                                                 "ready":  true,
+                                                 "excluded":  false
+                                             },
+                             "source_system":  "trace-ai",
+                             "locator":  null
+                         },
+                         {
+                             "source_id":  "p4b-source-infrastructure",
+                             "interaction_id":  "000000000000000000001006",
+                             "owner_id":  "000000000000000000000101",
+                             "session_id":  "p4b-session-1",
+                             "request_start_time":  "2026-09-02T10:04:00Z",
+                             "response_end_time":  "2026-09-02T10:04:01Z",
+                             "user_message":  "For ORBIT42 I am considering a local SQLite queue and a loopback-only MCP endpoint. These are design options, not deployed infrastructure.",
+                             "assistant_message":  "Those are proposed infrastructure choices.",
+                             "feedback":  {
+                                              "submitted":  true,
+                                              "rating":  4,
+                                              "correctness":  "Correct",
+                                              "length_type":  "To the Point",
+                                              "submitted_at":  "2026-09-02T10:04:02Z"
+                                          },
+                             "publication":  {
+                                                 "approved":  true,
+                                                 "ready":  true,
+                                                 "excluded":  false
+                                             },
+                             "source_system":  "trace-ai",
+                             "locator":  null
+                         },
+                         {
+                             "source_id":  "p4b-source-relocation-correction",
+                             "interaction_id":  "000000000000000000001007",
+                             "owner_id":  "000000000000000000000101",
+                             "session_id":  "p4b-session-1",
+                             "request_start_time":  "2026-09-02T10:05:00Z",
+                             "response_end_time":  "2026-09-02T10:05:01Z",
+                             "user_message":  "Correction: I decided not to relocate to Larch Haven. I still live in Cedar Bay. The earlier move was only a possibility and never happened.",
+                             "assistant_message":  "The relocation was cancelled; you report remaining in Cedar Bay.",
+                             "feedback":  {
+                                              "submitted":  true,
+                                              "rating":  4,
+                                              "correctness":  "Correct",
+                                              "length_type":  "To the Point",
+                                              "submitted_at":  "2026-09-02T10:05:02Z"
+                                          },
+                             "publication":  {
+                                                 "approved":  true,
+                                                 "ready":  true,
+                                                 "excluded":  false
+                                             },
+                             "source_system":  "trace-ai",
+                             "locator":  null
+                         },
+                         {
+                             "source_id":  "p4b-source-political-topic",
+                             "interaction_id":  "000000000000000000001008",
+                             "owner_id":  "000000000000000000000101",
+                             "session_id":  "p4b-session-1",
+                             "request_start_time":  "2026-09-02T10:06:00Z",
+                             "response_end_time":  "2026-09-02T10:06:01Z",
+                             "user_message":  "For a civics exercise, compare the fictional Civic Lantern and River Council parties. This question does not state my political affiliation or beliefs.",
+                             "assistant_message":  "I can compare the fictional parties without inferring your affiliation.",
+                             "feedback":  {
+                                              "submitted":  true,
+                                              "rating":  4,
+                                              "correctness":  "Correct",
+                                              "length_type":  "To the Point",
+                                              "submitted_at":  "2026-09-02T10:06:02Z"
+                                          },
+                             "publication":  {
+                                                 "approved":  true,
+                                                 "ready":  true,
+                                                 "excluded":  false
+                                             },
+                             "source_system":  "trace-ai",
+                             "locator":  null
+                         },
+                         {
+                             "source_id":  "p4b-source-quoted-hypothetical",
+                             "interaction_id":  "000000000000000000001009",
+                             "owner_id":  "000000000000000000000101",
+                             "session_id":  "p4b-session-1",
+                             "request_start_time":  "2026-09-02T10:07:00Z",
+                             "response_end_time":  "2026-09-02T10:07:01Z",
+                             "user_message":  "Here is a quoted hypothetical: \"My alias is COMET and my pet is MISO.\" That describes an invented character, not me.",
+                             "assistant_message":  "Your alias is PHANTOM and your pet is MISO. This assistant statement is deliberately unsupported test content.",
+                             "feedback":  {
+                                              "submitted":  true,
+                                              "rating":  4,
+                                              "correctness":  "Correct",
+                                              "length_type":  "To the Point",
+                                              "submitted_at":  "2026-09-02T10:07:02Z"
+                                          },
+                             "publication":  {
+                                                 "approved":  true,
+                                                 "ready":  true,
+                                                 "excluded":  false
+                                             },
+                             "source_system":  "trace-ai",
+                             "locator":  null
+                         },
+                         {
+                             "source_id":  "p4b-source-unicode",
+                             "interaction_id":  "00000000000000000000100a",
+                             "owner_id":  "000000000000000000000101",
+                             "session_id":  "p4b-session-1",
+                             "request_start_time":  "2026-09-02T10:08:00Z",
+                             "response_end_time":  "2026-09-02T10:08:01Z",
+                             "user_message":  "Unicode marker: café é 🤖 اردو 漢字. Keep this exact source text.",
+                             "assistant_message":  "The Unicode source is preserved.",
+                             "feedback":  {
+                                              "submitted":  true,
+                                              "rating":  4,
+                                              "correctness":  "Correct",
+                                              "length_type":  "To the Point",
+                                              "submitted_at":  "2026-09-02T10:08:02Z"
+                                          },
+                             "publication":  {
+                                                 "approved":  true,
+                                                 "ready":  true,
+                                                 "excluded":  false
+                                             },
+                             "source_system":  "trace-ai",
+                             "locator":  null
+                         },
+                         {
+                             "source_id":  "p4b-source-recent",
+                             "interaction_id":  "00000000000000000000100b",
+                             "owner_id":  "000000000000000000000101",
+                             "session_id":  "p4b-session-2",
+                             "request_start_time":  "2026-09-03T10:00:00Z",
+                             "response_end_time":  "2026-09-03T10:00:01Z",
+                             "user_message":  "Before my next follow-up, keep the cancellation correction and my concise reply preference in mind.",
+                             "assistant_message":  "I will preserve the stated correction and reply preference.",
+                             "feedback":  {
+                                              "submitted":  true,
+                                              "rating":  4,
+                                              "correctness":  "Correct",
+                                              "length_type":  "To the Point",
+                                              "submitted_at":  "2026-09-03T10:00:02Z"
+                                          },
+                             "publication":  {
+                                                 "approved":  true,
+                                                 "ready":  true,
+                                                 "excluded":  false
+                                             },
+                             "source_system":  "trace-ai",
+                             "locator":  null
+                         }
+                     ],
+    "foreign_control":  {
+                            "source_id":  "p4b-source-foreign-pet",
+                            "interaction_id":  "000000000000000000002001",
+                            "owner_id":  "000000000000000000000202",
+                            "session_id":  "p4b-foreign-session",
+                            "request_start_time":  "2026-09-02T11:00:00Z",
+                            "response_end_time":  "2026-09-02T11:00:01Z",
+                            "user_message":  "My pet is a cat named MISO. I completed a move to Larch Haven. My alias is COMET.",
+                            "assistant_message":  "This belongs exclusively to another fictional owner.",
+                            "feedback":  {
+                                             "submitted":  true,
+                                             "rating":  4,
+                                             "correctness":  "Correct",
+                                             "length_type":  "To the Point",
+                                             "submitted_at":  "2026-09-02T11:00:02Z"
+                                         },
+                            "publication":  {
+                                                "approved":  true,
+                                                "ready":  true,
+                                                "excluded":  false
+                                            },
+                            "source_system":  "trace-ai",
+                            "locator":  null
+                        }
+}
