@@ -1,3 +1,7 @@
+# Load only the explicitly approved private local connection before route policy.
+from backend.services.oomp_local import load_local_connection
+load_local_connection()
+
 from fastapi import Depends, FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware

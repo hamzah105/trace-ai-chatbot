@@ -4,3 +4,4 @@ tests/fixtures/p4b/v1/scenarios.json -text whitespace=blank-at-eol,blank-at-eof,
 tests/fixtures/p4b/v1/sources.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 tests/fixtures/p4b/v1/workloads.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 tests/fixtures/p4b/v1/preregistration.md text eol=lf
+backend/services/oomp_local.py text eol=lf
