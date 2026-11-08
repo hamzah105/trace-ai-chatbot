@@ -1,6 +1,7 @@
 """Independent synthetic local-bootstrap checks; no OOMP imports or database IO."""
 import hashlib
 import hmac
+from io import StringIO
 import json
 import os
 from pathlib import Path
@@ -8,6 +9,9 @@ import sys
 import types
 
 import pytest
+import dotenv
+from dotenv import dotenv_values as parse_dotenv_values
+from dotenv.main import DotEnv
 
 from backend.services import oomp_local as local
 
@@ -49,10 +53,40 @@ def write(path, value):
     protect(path)
 
 
+class InMemoryDotenv:
+    """Real stream parsing behind hooks for one exact fictional dotenv path."""
+    def __init__(self, path, text):
+        self.path = path
+        self.text = text
+
+    def require_path(self, path):
+        if Path(path) != self.path:
+            raise ValueError('unregistered synthetic dotenv path')
+
+    def values(self, path):
+        self.require_path(path)
+        return parse_dotenv_values(stream=StringIO(self.text))
+
+    def load(self, path, *, override=False):
+        self.require_path(path)
+        # CI suppresses the global loader. Exercise its real stream semantics
+        # only inside this fixture; do not restore a filesystem-capable loader.
+        return DotEnv(dotenv_path=None, stream=StringIO(self.text),
+                      override=override).set_as_environment_variables()
+
+
 @pytest.fixture
-def connection(tmp_path):
+def synthetic_dotenv(tmp_path, monkeypatch):
+    source = InMemoryDotenv(tmp_path/'trace'/'.env',
+        'MONGO_URI=mongodb://127.0.0.1:27017/\nMONGO_DB_NAME=fictional\n')
+    monkeypatch.setattr(dotenv, 'dotenv_values', source.values)
+    monkeypatch.setattr(dotenv, 'load_dotenv', source.load)
+    return source
+
+
+@pytest.fixture
+def connection(tmp_path, synthetic_dotenv):
     root=tmp_path/'trace'; root.mkdir()
-    (root/'.env').write_text('MONGO_URI=mongodb://127.0.0.1:27017/\nMONGO_DB_NAME=fictional\n')
     home=tmp_path/'p'; home.mkdir(); protect(home)
     directory=home/'reader'; directory.mkdir(); protect(directory)
     profile={'name':'reader','adapter':'trace','project':str(root),'secret_source':'file',
@@ -210,7 +244,7 @@ def trusted_connection(connection):
 
 
 @pytest.mark.parametrize('publication',[False,True])
-def test_signed_handoff_precedes_same_owner_legacy_dotenv_without_file_edits(connection,monkeypatch,publication):
+def test_signed_handoff_precedes_same_owner_legacy_dotenv_without_file_edits(connection,synthetic_dotenv,monkeypatch,publication):
     if publication:
         connection=trusted_connection(connection)
     root,directory,gen,body=connection
@@ -221,8 +255,9 @@ def test_signed_handoff_precedes_same_owner_legacy_dotenv_without_file_edits(con
         'TRACE_OOMP_TENANT_ID=legacy-tenant\nTRACE_OOMP_PRINCIPAL_ID=legacy-principal\n'
         'TRACE_OOMP_READ_TOKEN='+('Y'*43)+'\nTRACE_OOMP_OWNER_KEY='+('Z'*43)+'\n'
         'TRACE_OOMP_WRITER_CONFIG=legacy-writers.json\nUNRELATED_TRACE_DEFAULT=retained\n')
-    (root/'.env').write_text(legacy)
-    before={path:path.read_bytes() for path in (root/'.env',root/local.LOCAL_FILE,
+    synthetic_dotenv.text=legacy
+    before_dotenv=synthetic_dotenv.text
+    before={path:path.read_bytes() for path in (root/local.LOCAL_FILE,
         directory/'secrets.json',directory/'active.json')}
     result=local.load_local_connection(root)
     assert result['mode']==('retrieve_and_ingest' if publication else 'retrieve')
@@ -242,18 +277,19 @@ def test_signed_handoff_precedes_same_owner_legacy_dotenv_without_file_edits(con
     assert os.environ['TRACE_OOMP_URL']=='http://127.0.0.1:18765/mcp'
     assert os.environ['TRACE_OOMP_OWNER_KEY']=='A'*43
     assert os.environ['UNRELATED_TRACE_DEFAULT']=='retained'
+    assert synthetic_dotenv.text==before_dotenv and not synthetic_dotenv.path.exists()
     assert before=={path:path.read_bytes() for path in before}
 
 
-def test_foreign_dotenv_owner_fails_without_partial_memory_activation(connection):
+def test_foreign_dotenv_owner_fails_without_partial_memory_activation(connection,synthetic_dotenv):
     root,*_=connection
-    (root/'.env').write_text('MONGO_DB_NAME=fictional\nTRACE_OOMP_OWNER_ID=000000000000000000000002\n')
-    before=(root/'.env').read_bytes()
+    synthetic_dotenv.text='MONGO_DB_NAME=fictional\nTRACE_OOMP_OWNER_ID=000000000000000000000002\n'
+    before=synthetic_dotenv.text
     env={'UNRELATED':'keep'}
     with pytest.raises(local.LocalConnectionError):
         local.load_local_connection(root,environment=env)
     assert env=={'UNRELATED':'keep'}
-    assert (root/'.env').read_bytes()==before
+    assert synthetic_dotenv.text==before and not synthetic_dotenv.path.exists()
 
 
 @pytest.mark.parametrize('field,value',[
@@ -262,12 +298,33 @@ def test_foreign_dotenv_owner_fails_without_partial_memory_activation(connection
     ('TRACE_OOMP_TENANT_ID','foreign-tenant'),
     ('TRACE_OOMP_READ_TOKEN','Z'*43),
 ])
-def test_explicit_process_settings_still_reject_with_same_owner_dotenv(connection,monkeypatch,field,value):
+def test_explicit_process_settings_still_reject_with_same_owner_dotenv(connection,synthetic_dotenv,monkeypatch,field,value):
     root,_,_,body=connection
     clear_process_memory_settings(monkeypatch)
-    (root/'.env').write_text(f'TRACE_OOMP_OWNER_ID={body["owner_id"]}\nMONGO_DB_NAME=fictional\n')
+    synthetic_dotenv.text=f'TRACE_OOMP_OWNER_ID={body["owner_id"]}\nMONGO_DB_NAME=fictional\n'
     monkeypatch.setenv(field,value)
     before=dict(os.environ)
     with pytest.raises(local.LocalConnectionError):
         local.load_local_connection(root)
     assert dict(os.environ)==before
+
+
+def test_in_memory_dotenv_preserves_real_parser_and_override_semantics(synthetic_dotenv,monkeypatch):
+    monkeypatch.setattr(os,'environ',{'TRACE_TEST_LITERAL':'existing'})
+    synthetic_dotenv.text="TRACE_TEST_LITERAL='fictional # quoted'\nTRACE_TEST_NUMBER=42\n"
+    before=synthetic_dotenv.text
+    assert dotenv.dotenv_values(synthetic_dotenv.path)=={
+        'TRACE_TEST_LITERAL':'fictional # quoted','TRACE_TEST_NUMBER':'42'}
+    assert dotenv.load_dotenv(synthetic_dotenv.path,override=False)
+    assert os.environ=={'TRACE_TEST_LITERAL':'existing','TRACE_TEST_NUMBER':'42'}
+    assert dotenv.load_dotenv(synthetic_dotenv.path,override=True)
+    assert os.environ['TRACE_TEST_LITERAL']=='fictional # quoted'
+    assert synthetic_dotenv.text==before and not synthetic_dotenv.path.exists()
+
+
+@pytest.mark.parametrize('operation',['values','load'])
+def test_in_memory_dotenv_rejects_unregistered_paths(synthetic_dotenv,operation):
+    foreign=synthetic_dotenv.path.parent.parent/'foreign'/'.env'
+    with pytest.raises(ValueError,match='unregistered synthetic dotenv path'):
+        getattr(synthetic_dotenv,operation)(foreign)
+    assert not synthetic_dotenv.path.exists() and not foreign.exists()

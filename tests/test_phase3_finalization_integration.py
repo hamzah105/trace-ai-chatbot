@@ -40,8 +40,8 @@ async def asgi_request(app, method, path, *, query=None, payload=None):
 class FinalizationHTTPTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # app.py ordinarily connects/indexes MongoDB at import. Never do that in tests.
-        with patch("backend.database.database.connect_db"):
+        # Keep startup discovery and MongoDB connection outside these synthetic HTTP tests.
+        with patch("backend.services.oomp_local.load_local_connection", return_value={"configured":False}), patch("backend.database.database.connect_db"):
             cls.app = importlib.import_module("backend.app").app
 
     def setUp(self):

@@ -174,7 +174,8 @@ def http_request(*, headers=None, owner=OWNER):
 
 
 def app_instance():
-    with patch("backend.database.database.connect_db"):
+    # Synthetic routes must never discover a workstation's private handoff.
+    with patch("backend.services.oomp_local.load_local_connection", return_value={"configured":False}), patch("backend.database.database.connect_db"):
         return importlib.import_module("backend.app").app
 
 def activate(monkeypatch, server, folder, *, mode="retrieve_and_ingest", **changes):
