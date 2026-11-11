@@ -56,6 +56,15 @@ def _new_state():
             "lease_token": None, "last_error": None}
 
 
+def _feedback(row):
+    value = row.get("feedback")
+    if value is None:
+        return {}
+    if not isinstance(value, dict):
+        raise OOMPError("invalid_source")
+    return value
+
+
 def ensure_entries(database, config, interaction_id):
     row = database["chat_history"].find_one({"_id": ObjectId(interaction_id), "user_id": config.owner_id})
     if not row or not _eligible(row, config):
@@ -65,7 +74,7 @@ def ensure_entries(database, config, interaction_id):
     if not session or not row.get("llama_response") or not row.get("user_message"):
         raise OOMPError("invalid_source")
     roles = ["user", "assistant"]
-    if (row.get("feedback") or {}).get("submitted") is True:
+    if _feedback(row).get("submitted") is True:
         roles.append("feedback")
     added = 0
     for role in roles:
@@ -121,7 +130,7 @@ def make_payload(row, role, config):
     elif role == "assistant":
         content, occurred, kind = row["llama_response"], row["response_end_time"], "assistant_message"
     else:
-        feedback = row.get("feedback") or {}
+        feedback = _feedback(row)
         if (feedback.get("submitted") is not True or (not isinstance(feedback.get("rating"), int) or isinstance(feedback.get("rating"), bool))
                 or not 1 <= feedback["rating"] <= 4
                 or feedback.get("correctness") not in {"Correct", "Partial", "Incorrect"}
@@ -179,7 +188,7 @@ class Publisher:
         for row in rows[:limit]:
             result["scanned"] += 1
             try:
-                roles = ("user", "assistant", "feedback") if (row.get("feedback") or {}).get("submitted") is True else ("user", "assistant")
+                roles = ("user", "assistant", "feedback") if _feedback(row).get("submitted") is True else ("user", "assistant")
                 for role in roles:
                     make_payload(row, role, self.config)
                     result["events_missing"] += role not in row["oomp_publication"].get("events", {})

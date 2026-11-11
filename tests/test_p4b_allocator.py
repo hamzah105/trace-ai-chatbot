@@ -99,6 +99,8 @@ def test_same_long_eight_sources_fit_by_complete_suffix_without_starving_evidenc
 @pytest.mark.parametrize("message", [
     'Preserve quotes: "\\", newline:\n and JSON: {"x":"y"}.',
     "اردو کی اصل عبارت۔ 漢字 e\u0301 café 🙂",
+    "DO NOT RECALL the old project. Explain recursion briefly.",
+    "That is not a completed build; it is only a plan. Agla sawal: recursion samjhao. اردو 🙂",
 ])
 def test_full_current_message_and_utf8_json_overhead_are_measured(message):
     settings = config(max_prompt_bytes=4500)

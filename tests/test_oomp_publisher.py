@@ -24,6 +24,35 @@ class AcceptingClient:
                 "worker_started_by_request":False,"outbox_state":"pending","latest_extraction_job_status":None}
 
 
+@pytest.mark.parametrize("feedback", ["malformed legacy value", [], 1, False])
+def test_reconciliation_isolates_invalid_feedback_without_discarding_source(database, staged, feedback):
+    identifier, config = staged
+    database["chat_history"].update_one({"_id":identifier},{"$set":{"feedback":feedback}})
+    before = database["chat_history"].find_one({"_id":identifier})
+    result = Publisher(database, config).reconcile(dry_run=False)
+    assert result["scanned"] == 1 and result["invalid"] == 1 and result["scheduled"] == 0
+    assert database["chat_history"].find_one({"_id":identifier}) == before
+
+
+@pytest.mark.parametrize("feedback", ["malformed legacy value", [], 1, False])
+def test_invalid_feedback_claim_fails_once_without_reviving_or_blocking_valid_roles(database, staged, feedback):
+    identifier, config = staged
+    row = database["chat_history"].find_one({"_id":identifier})
+    pending = copy.deepcopy(row["oomp_publication"]["events"]["user"])
+    database["chat_history"].update_one({"_id":identifier},{"$set":{
+        "feedback":feedback,"oomp_publication.events.feedback":pending}})
+    client = AcceptingClient()
+    publisher = Publisher(database, config, client=client)
+    assert publisher.deliver(identifier,"feedback") == "failed"
+    assert publisher.deliver(identifier,"feedback") == "not_claimed"
+    state = database["chat_history"].find_one({"_id":identifier})["oomp_publication"]["events"]["feedback"]
+    assert state["last_error"] == "invalid_source" and state["attempts"] == 1
+    assert client.accepted == []
+    assert publisher.deliver(identifier,"user") == "delivered"
+    assert len(client.accepted) == 1
+    assert database["chat_history"].find_one({"_id":identifier})["feedback"] == feedback
+
+
 @pytest.fixture
 def staged(database):
     row=chat_row(feedback=False)
