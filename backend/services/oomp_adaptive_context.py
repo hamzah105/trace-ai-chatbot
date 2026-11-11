@@ -130,6 +130,8 @@ def prepare_context_prompt(request, config, database):
             diagnostics.update(retrieval_success=True, retrieved_context_units=len(units),
                                evidence_budget_used=result.selected_context_bytes)
         except OOMPError as error:
+            if error.code in {"authorization_failed", "forbidden", "unauthorized"}:
+                raise HTTPException(status_code=403, detail="Memory authorization rejected") from None
             degraded = True
             status = _ERROR_STATUSES.get(error.code, "unavailable")
             # Log only this finite sanitized set, never remote text or input.

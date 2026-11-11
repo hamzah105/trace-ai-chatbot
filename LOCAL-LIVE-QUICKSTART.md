@@ -1,5 +1,31 @@
 # OOMP + TRACE: local live quickstart
 
+## TRACE standalone: OOMP is optional
+
+Start TRACE directly using its own interpreter, even if another environment is
+activated in the terminal. MongoDB and the existing local LLaMA service are still
+required for chat storage and generation; OOMP does not need to be started.
+
+```powershell
+cd 'D:\Desktop\VU BS-CS\CS619\TRACE'
+.\.venv\Scripts\python.exe -m uvicorn backend.app:app --host 127.0.0.1 --port 8000 --no-access-log
+```
+
+Use the same login, chat and analytics UI at `http://127.0.0.1:8000/`. When optional
+OOMP recall is unavailable or times out, TRACE uses its normal prompt containing
+the current message and up to eight recent, same-user, same-session interactions
+with their feedback. Retrieval-status JSON is kept out of that model prompt.
+Greetings and general questions use ordinary model knowledge; absent personal
+history must not be invented. Current-session excluded sources stay excluded.
+
+When OOMP is available, authenticated Context V1 and original-source verification
+remain active. Invalid signed configuration, wrong owners and authentication
+denials fail closed; do not delete a handoff or override credentials to bypass
+those errors. Existing signed local configuration is validated even while OOMP
+is offline. No profile, stored conversation, feedback or analytics reset is needed.
+Mandatory feedback and the HTTP 409 gate remain unchanged. Use Ctrl+C to stop
+this server before editing source; the submission command omits `--reload`.
+
 Use the approved `trace-live` profile at `D:\os-trace-live-1108`. Its existing
 owner, credentials, database and grants are preserved. A one-time private local
 handoff selects that profile for this TRACE checkout; other installations remain
