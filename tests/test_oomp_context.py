@@ -8,6 +8,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
+from fastapi import HTTPException
 
 from backend.routes.chat import ChatRequest,chat,build_context_prompt
 from backend.services.oomp_client import OOMPClient,OOMPError
@@ -46,7 +47,7 @@ def wire(memories,budget=1200):
     )
 
 
-def test_disabled_prompt_matches_exact_previous_commit(database):
+def test_disabled_prompt_preserves_exact_legacy_sources_with_standalone_policy(database):
     rows=[chat_row(n,text=f"Unicode café turn {n}.") for n in range(12)]
     database["chat_history"].insert_many(rows)
     source=subprocess.check_output(["git","show","6976c51:backend/routes/chat.py"],text=True,encoding="utf-8")
@@ -56,7 +57,13 @@ def test_disabled_prompt_matches_exact_previous_commit(database):
     with route_database(database):
         old=namespace["build_context_prompt"](SESSION,OWNER,"What was said?")
         current=build_context_prompt(SESSION,OWNER,"What was said?")
-    assert old.encode()==current.encode()
+    # The approved standalone policy intentionally changes the instruction
+    # prefix. Original recent text, feedback, Unicode and current input remain
+    # byte-identical to the legacy source sections; no history is reformatted.
+    marker = "CONVERSATION TRANSCRIPT"
+    assert old.split(marker, 1)[1].encode() == current.split(marker, 1)[1].encode()
+    assert "Answer greetings and general questions normally" in current
+    assert "Only when asked for personal or conversation history" in current
 
 
 @pytest.mark.parametrize("mutation",["packet_text","packet_count","budget","extra_scope","ids","untrusted"])
@@ -125,14 +132,23 @@ def test_nonpositive_relevance_never_becomes_historical_prompt(database):
 
 
 @pytest.mark.parametrize("code",["timeout","unavailable","authorization_failed","invalid_response","busy","scope_rejected"])
-def test_outage_and_auth_failures_fall_back_with_sanitized_diagnostics(database,monkeypatch,tmp_path,code,caplog):
+def test_outage_falls_back_but_authentication_fails_closed(database,monkeypatch,tmp_path,code,caplog):
     activate(monkeypatch,SimpleNamespace(url="http://127.0.0.1:9/mcp"),tmp_path,mode="retrieve")
     database["chat_history"].insert_many([chat_row(n) for n in range(10)])
     with route_database(database):
         expected=build_context_prompt(SESSION,OWNER,"PRIVATE-QUESTION")
         with patch("backend.services.chat_orchestrator.OOMPClient.retrieve",side_effect=OOMPError(code)), \
              patch("backend.routes.chat.generate_response",return_value="answer") as model:
-            response=chat(ChatRequest(message="PRIVATE-QUESTION",session_id=SESSION,user_id=OWNER),http_request())
+            if code == "authorization_failed":
+                with pytest.raises(HTTPException) as denied:
+                    chat(ChatRequest(message="PRIVATE-QUESTION",session_id=SESSION,user_id=OWNER),http_request())
+                assert denied.value.status_code == 403
+            else:
+                response=chat(ChatRequest(message="PRIVATE-QUESTION",session_id=SESSION,user_id=OWNER),http_request())
+    if code == "authorization_failed":
+        model.assert_not_called()
+        assert database["chat_history"].count_documents({}) == 10
+        return
     model.assert_called_once_with(expected)
     stored=database["chat_history"].find_one({"_id":__import__("bson").ObjectId(response["interaction_id"])})
     assert stored["oomp_diagnostics"]["error_code"]==code

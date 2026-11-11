@@ -204,12 +204,28 @@ def test_wire_statuses_remain_truthful_without_legacy_downgrade(
     with route_database(database), synthetic_mcp(units=units, status=status, coverage=coverage) as calls, \
          patch.object(OOMPClient, "retrieve") as legacy, \
          patch("backend.routes.chat.generate_response", return_value=FAKE_ANSWER) as model:
-        response = chat(ChatRequest(message=message, session_id=SESSION, user_id=OWNER), http_request())
+        expected_standalone = build_context_prompt(SESSION, OWNER, message)
+        if status == "unauthorized":
+            with pytest.raises(HTTPException) as denied:
+                chat(ChatRequest(message=message, session_id=SESSION, user_id=OWNER), http_request())
+            assert denied.value.status_code == 403
+        else:
+            response = chat(ChatRequest(message=message, session_id=SESSION, user_id=OWNER), http_request())
     legacy.assert_not_called()
     assert len(calls) == 1 and calls[0][0] == "memory.context"
+    if status == "unauthorized":
+        model.assert_not_called()
+        assert database["chat_history"].count_documents({}) == 2
+        return
     prompt = model.call_args.args[0]
-    data = prompt_data(prompt)
     diagnostics = saved_interaction(database, response)["oomp_diagnostics"]
+    if status == "unavailable":
+        assert prompt == expected_standalone and "HISTORICAL_CONTEXT" not in prompt
+        assert diagnostics["context_status"] == status
+        assert diagnostics["prompt_mode"] == "standalone"
+        assert_prompt_capacity(prompt, diagnostics, config)
+        return
+    data = prompt_data(prompt)
     assert data["HISTORICAL_CONTEXT"]["status"] == status
     assert diagnostics["context_status"] == status
     assert data["CURRENT_USER_MESSAGE"] == message
@@ -238,19 +254,27 @@ def test_context_failures_keep_bounded_truthful_status_and_sanitized_logs(
     with route_database(database), synthetic_mcp(error=code) as calls, \
          patch.object(OOMPClient, "retrieve") as legacy, \
          patch("backend.routes.chat.generate_response", return_value=FAKE_ANSWER) as model:
-        response = chat(ChatRequest(message=message, session_id=SESSION, user_id=OWNER), http_request())
+        expected_standalone = build_context_prompt(SESSION, OWNER, message)
+        if expected == "unauthorized":
+            with pytest.raises(HTTPException) as denied:
+                chat(ChatRequest(message=message, session_id=SESSION, user_id=OWNER), http_request())
+            assert denied.value.status_code == 403
+        else:
+            response = chat(ChatRequest(message=message, session_id=SESSION, user_id=OWNER), http_request())
     legacy.assert_not_called()
     assert len(calls) == 1
+    if expected == "unauthorized":
+        model.assert_not_called()
+        assert database["chat_history"].count_documents({}) == 1
+        return
     prompt = model.call_args.args[0]
-    data = prompt_data(prompt)
     diagnostics = saved_interaction(database, response)["oomp_diagnostics"]
     assert diagnostics["error_code"] == code and not diagnostics["retrieval_success"]
-    assert diagnostics["context_status"] == data["HISTORICAL_CONTEXT"]["status"] == expected
-    assert data["HISTORICAL_CONTEXT"]["authoritative_source_units"] == []
-    assert data["CURRENT_USER_MESSAGE"] == message
+    assert prompt == expected_standalone and "HISTORICAL_CONTEXT" not in prompt
+    assert diagnostics["context_status"] == expected and diagnostics["prompt_mode"] == "standalone"
+    assert diagnostics["evidence_count"] == 0
     assert source["user_message"] in prompt
     assert message not in caplog.text and source["user_message"] not in caplog.text
-    assert "not in current session memory" not in prompt
     assert_prompt_capacity(prompt, diagnostics, config)
 
 
